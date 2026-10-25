@@ -5,11 +5,7 @@
   "group": "C++ puro",
   "url": "https://news.ycombinator.com/submitted?id=whoishiring",
   "kind": "auto",
-  "note": "Thread mensile letto via API Algolia.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "ok",
-  "lastCount": 6,
-  "found": 15
+  "note": "Thread mensile letto via API Algolia."
  },
  {
   "id": "meetingcpp",
@@ -17,11 +13,7 @@
   "group": "C++ puro",
   "url": "https://meetingcpp.com/jobs/",
   "kind": "auto",
-  "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "ok",
-  "lastCount": 0,
-  "found": 0
+  "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa."
  },
  {
   "id": "himalayas",
@@ -29,11 +21,7 @@
   "group": "C++ puro",
   "url": "https://himalayas.app/jobs",
   "kind": "auto",
-  "note": "API ufficiale: solo remoti che ammettono l'Italia.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "ok",
-  "lastCount": 52,
-  "found": 79
+  "note": "API ufficiale: solo remoti che ammettono l'Italia."
  },
  {
   "id": "remotive",
@@ -41,11 +29,7 @@
   "group": "C++ puro",
   "url": "https://remotive.com/",
   "kind": "auto",
-  "note": "API pubblica di annunci remoti.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "ok",
-  "lastCount": 6,
-  "found": 20
+  "note": "API pubblica di annunci remoti."
  },
  {
   "id": "arbeitnow",
@@ -53,11 +37,7 @@
   "group": "C++ puro",
   "url": "https://www.arbeitnow.com/",
   "kind": "auto",
-  "note": "API pubblica, forte su Germania ed Europa.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "ok",
-  "lastCount": 3,
-  "found": 900
+  "note": "API pubblica, forte su Germania ed Europa."
  },
  {
   "id": "reddit",
@@ -65,11 +45,7 @@
   "group": "C++ puro",
   "url": "https://www.reddit.com/r/cpp/",
   "kind": "auto",
-  "note": "Thread trimestrale. Serve un'app Reddit gratuita (vedi README).",
-  "lastRead": "2026-10-25",
-  "lastStatus": "non configurata",
-  "lastCount": 0,
-  "error": "mancano i secret REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET"
+  "note": "Thread trimestrale. Serve un'app Reddit gratuita (vedi README)."
  },
  {
   "id": "jooble",
@@ -77,11 +53,7 @@
   "group": "Roma e Italia",
   "url": "https://it.jooble.org/",
   "kind": "auto",
-  "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "non configurata",
-  "lastCount": 0,
-  "error": "manca il secret JOOBLE_API_KEY"
+  "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane."
  },
  {
   "id": "adzuna",
@@ -89,11 +61,7 @@
   "group": "Roma e Italia",
   "url": "https://www.adzuna.it/",
   "kind": "auto",
-  "note": "API gratuita con chiave (vedi README).",
-  "lastRead": "2026-10-25",
-  "lastStatus": "non configurata",
-  "lastCount": 0,
-  "error": "mancano i secret ADZUNA_APP_ID / ADZUNA_APP_KEY"
+  "note": "API gratuita con chiave (vedi README)."
  },
  {
   "id": "workable",
@@ -101,11 +69,7 @@
   "group": "Studi e aziende",
   "url": "https://apply.workable.com/",
   "kind": "auto",
-  "note": "Pagine carriere degli studi: Rebellion verificato, gli altri slug da confermare al primo run.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "ok",
-  "lastCount": 15,
-  "found": 71
+  "note": "Pagine carriere degli studi: Rebellion verificato, gli altri slug da confermare al primo run."
  },
  {
   "id": "greenhouse",
@@ -113,11 +77,7 @@
   "group": "Studi e aziende",
   "url": "https://boards.greenhouse.io/",
   "kind": "auto",
-  "note": "Slug da confermare al primo run.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "errore",
-  "lastCount": 0,
-  "error": "ConnectionError: HTTPSConnectionPool(host='boards-api.eu.greenhouse.io', port=443): Max retries exceeded with url: /v1/boards/keensoftwarehouseas/jobs?content=true (Caused by NameResolutionError(\"HTTPSConnection(host="
+  "note": "Slug da confermare al primo run."
  },
  {
   "id": "lever",
@@ -125,11 +85,7 @@
   "group": "Studi e aziende",
   "url": "https://jobs.lever.co/",
   "kind": "auto",
-  "note": "Slug da confermare al primo run.",
-  "lastRead": "2026-10-25",
-  "lastStatus": "errore",
-  "lastCount": 0,
-  "error": "HTTPError: 404 Client Error: Not Found for url: https://api.lever.co/v0/postings/virtuos?mode=json"
+  "note": "Slug da confermare al primo run."
  },
  {
   "id": "linkedin-c-roma",

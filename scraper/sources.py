@@ -155,8 +155,8 @@ def arbeitnow(cfg):
 
 
 def workable(cfg):
-	out = []
-	for company in cfg.get("companies", []):
+	def fetch(company):
+		out = []
 		data = get(f"https://apply.workable.com/api/v1/widget/accounts/{company['slug']}").json()
 		for j in data.get("jobs", []):
 			loc = ", ".join(x for x in (j.get("city"), j.get("country")) if x)
@@ -172,12 +172,14 @@ def workable(cfg):
 				"default_tech": company.get("tech"),
 				"source": f"{company.get('name')} (Workable)",
 			})
-	return out
+		return out
+
+	return each_company(cfg, fetch)
 
 
 def greenhouse(cfg):
-	out = []
-	for company in cfg.get("companies", []):
+	def fetch(company):
+		out = []
 		host = "boards-api.eu.greenhouse.io" if company.get("eu") else "boards-api.greenhouse.io"
 		data = get(f"https://{host}/v1/boards/{company['slug']}/jobs", params={"content": "true"}).json()
 		for j in data.get("jobs", []):
@@ -194,12 +196,14 @@ def greenhouse(cfg):
 				"default_tech": company.get("tech"),
 				"source": f"{company.get('name')} (Greenhouse)",
 			})
-	return out
+		return out
+
+	return each_company(cfg, fetch)
 
 
 def lever(cfg):
-	out = []
-	for company in cfg.get("companies", []):
+	def fetch(company):
+		out = []
 		host = "api.eu.lever.co" if company.get("eu") else "api.lever.co"
 		data = get(f"https://{host}/v0/postings/{company['slug']}", params={"mode": "json"}).json()
 		for j in data:
@@ -217,12 +221,14 @@ def lever(cfg):
 				"default_tech": company.get("tech"),
 				"source": f"{company.get('name')} (Lever)",
 			})
-	return out
+		return out
+
+	return each_company(cfg, fetch)
 
 
 def ashby(cfg):
-	out = []
-	for company in cfg.get("companies", []):
+	def fetch(company):
+		out = []
 		data = get(f"https://api.ashbyhq.com/posting-api/job-board/{company['slug']}").json()
 		for j in data.get("jobs", []):
 			out.append({
@@ -237,7 +243,9 @@ def ashby(cfg):
 				"default_tech": company.get("tech"),
 				"source": f"{company.get('name')} (Ashby)",
 			})
-	return out
+		return out
+
+	return each_company(cfg, fetch)
 
 
 # ---------------------------------------------------------------- Meeting C++ (pagina HTML)
@@ -358,6 +366,23 @@ def reddit_cpp(cfg):
 			"gaming": None,
 			"source": "r/cpp – C++ Jobs",
 		})
+	return out
+
+
+LAST_ERRORS = {}  # tipo fonte -> errori dei singoli studi nell'ultimo giro
+
+
+def each_company(cfg, fetch):
+	"""Esegue fetch(company) per ogni studio; uno slug sbagliato non blocca gli altri."""
+	out, errors = [], []
+	for company in cfg.get("companies", []):
+		try:
+			out.extend(fetch(company))
+		except Exception as exc:  # noqa: BLE001
+			errors.append(f"{company.get('name')}: {type(exc).__name__} {str(exc)[:80]}")
+	LAST_ERRORS[cfg["type"]] = errors
+	if errors and not out and len(errors) == len(cfg.get("companies", [])):
+		raise RuntimeError("; ".join(errors))
 	return out
 
 

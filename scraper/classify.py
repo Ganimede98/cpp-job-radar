@@ -9,6 +9,9 @@ resta "n.d." o "verificare" invece di indovinare.
 import html
 import re
 
+# Versione delle regole: quando cambia, gli annunci automatici classificati con regole vecchie vengono rivalutati.
+RULES_VERSION = 2
+
 # ---------------------------------------------------------------- testo
 
 
@@ -35,6 +38,7 @@ RE_CPP = re.compile(r"c\+\+|\bcpp\b|c/c\+\+", re.I)
 RE_UNREAL = re.compile(r"unreal|\bue\s?[45]\b", re.I)
 RE_UNITY = re.compile(r"\bunity\b", re.I)
 RE_CSHARP = re.compile(r"c#|\.net\b", re.I)
+RE_OFF_TOPIC_ROLE = re.compile(r"\b(back-?end|front-?end|full-?stack|react|web|android|ios|devops|sre|site reliability|data (engineer|scientist|analyst)|qa|security|sales|marketing|recruit\w*)\b", re.I)
 RE_DEV_ROLE = re.compile(r"engineer|programmer|developer|sviluppatore|programmatore|software|coder|ingegnere", re.I)
 
 
@@ -115,7 +119,7 @@ def detect_mode(text):
 	return "n.d."
 
 
-def detect_geo(location, text, remote, countries):
+def detect_geo(location, text, remote, countries, title=""):
 	"""Restituisce (geo, city, nota) oppure (None, ...) se l'annuncio va scartato.
 
 	geo: "ok" = Italia ammessa, "verificare" = non chiaro, "no" = Italia esclusa.
@@ -130,7 +134,8 @@ def detect_geo(location, text, remote, countries):
 			return "ok", "", "L'Italia è tra i paesi ammessi."
 		return "no", "", "Paesi ammessi: " + ", ".join(countries[:8]) + ("…" if len(countries) > 8 else "")
 	if remote:
-		if RE_ITALY.search(loc) or RE_EU_OK.search(loc):
+		head = f"{loc} {title}"
+		if RE_ITALY.search(head) or RE_EU_OK.search(head):
 			return "ok", "", "Remoto aperto a Europa/Italia secondo la fonte."
 		if RE_ELSEWHERE.search(loc):
 			return "no", "", "Remoto limitato a: " + loc
@@ -199,12 +204,21 @@ def classify(raw, default_tech=None):
 	text = f"{title} {description}"
 	if not RE_DEV_ROLE.search(title):
 		return None
+	# Ruoli web/backend/mobile/dati: esclusi, a meno che il titolo non citi esplicitamente C++.
+	if RE_OFF_TOPIC_ROLE.search(title) and not RE_CPP.search(title):
+		return None
 
 	level = detect_level(title)
 	if level is None:
 		return None
 
 	tech = detect_tech(text)
+	# Rilevanza: la tecnologia deve stare nel titolo, oppure essere citata almeno due volte nella descrizione.
+	# Evita gli annunci generici che elencano C++ in mezzo a venti linguaggi.
+	title_hit = bool(RE_CPP.search(title) or RE_UNREAL.search(title) or RE_UNITY.search(title))
+	desc_hits = len(RE_CPP.findall(description)) + len(RE_UNREAL.findall(description))
+	if not title_hit and desc_hits < 2 and not default_tech:
+		return None
 	if not tech and default_tech:
 		tech = list(default_tech)
 	if not tech:
@@ -217,9 +231,9 @@ def classify(raw, default_tech=None):
 	remote = raw.get("remote")
 	if remote is None:
 		remote = bool(RE_REMOTE.search(f"{location} {title}"))
-	geo, city, geo_note = detect_geo(location, text, remote, raw.get("countries") or [])
-	if geo is None:
-		return None
+	geo, city, geo_note = detect_geo(location, text, remote, raw.get("countries") or [], title)
+	if geo in (None, "no"):
+		return None  # fuori Roma senza remoto, oppure remoto che esclude l'Italia
 
 	mode = detect_mode(f"{location} {title} {description[:1500]}")
 	if remote and mode == "n.d.":
@@ -246,6 +260,7 @@ def classify(raw, default_tech=None):
 		"status": "aperto",
 		"summary": summary,
 		"origin": "auto",
+		"rules": RULES_VERSION,
 	}
 
 

@@ -366,7 +366,7 @@ footer p{margin:0;max-width:75ch}
           <span>Sede: <b>${esc(j.location||"n.d.")}</b></span>
           <span>Stipendio: <b>${esc(j.salary||"non indicato")}</b></span>
           <span>Pubblicato: <b class="mono">${fmtDate(j.posted)}</b></span>
-          <span>Controllato: <span class="mono">${fmtDate(j.checkedAt)}</span></span>
+          <span>${j.origin==="seed"?"Verificato a mano":"Controllato"}: <span class="mono">${fmtDate(j.checkedAt)}</span></span>
         </div>
         <details>
           <summary>Dettagli</summary>

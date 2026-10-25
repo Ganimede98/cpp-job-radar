@@ -15,8 +15,8 @@ import traceback
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-from classify import classify, dedupe_key, slug  # noqa: E402
-from sources import READERS, SkipSource  # noqa: E402
+from classify import RULES_VERSION, classify, dedupe_key, slug  # noqa: E402
+from sources import LAST_ERRORS, READERS, SkipSource  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA = ROOT / "docs" / "data"
@@ -50,7 +50,8 @@ def too_old(posted, max_days):
 
 def main():
 	now = today()
-	previous = {j["id"]: j for j in load("jobs.json", [])}
+	# Gli annunci automatici classificati con regole vecchie vengono scartati e rivalutati da capo.
+	previous = {j["id"]: j for j in load("jobs.json", []) if j.get("origin") != "auto" or j.get("rules") == RULES_VERSION}
 	by_key = {dedupe_key(j): j["id"] for j in previous.values()}
 
 	found = {}          # id -> job
@@ -82,7 +83,10 @@ def main():
 				else:
 					found[job_id] = job
 				kept += 1
-			entry.update(lastStatus="ok", lastCount=kept, found=len(raw_jobs))
+			partial = LAST_ERRORS.pop(src["type"], [])
+			entry.update(lastStatus="parziale" if partial else "ok", lastCount=kept, found=len(raw_jobs))
+			if partial:
+				entry["error"] = "; ".join(partial)[:300]
 			ok_sources.add(src["id"])
 		except SkipSource as exc:
 			entry.update(lastStatus="non configurata", lastCount=0, error=str(exc))
