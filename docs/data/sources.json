@@ -5,7 +5,11 @@
   "group": "C++ puro",
   "url": "https://news.ycombinator.com/submitted?id=whoishiring",
   "kind": "auto",
-  "note": "Thread mensile letto via API Algolia."
+  "note": "Thread mensile letto via API Algolia.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "ok",
+  "lastCount": 1,
+  "found": 15
  },
  {
   "id": "meetingcpp",
@@ -13,7 +17,11 @@
   "group": "C++ puro",
   "url": "https://meetingcpp.com/jobs/",
   "kind": "auto",
-  "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa."
+  "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "ok",
+  "lastCount": 0,
+  "found": 0
  },
  {
   "id": "himalayas",
@@ -21,7 +29,11 @@
   "group": "C++ puro",
   "url": "https://himalayas.app/jobs",
   "kind": "auto",
-  "note": "API ufficiale: solo remoti che ammettono l'Italia."
+  "note": "API ufficiale: solo remoti che ammettono l'Italia.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "ok",
+  "lastCount": 2,
+  "found": 79
  },
  {
   "id": "remotive",
@@ -29,7 +41,11 @@
   "group": "C++ puro",
   "url": "https://remotive.com/",
   "kind": "auto",
-  "note": "API pubblica di annunci remoti."
+  "note": "API pubblica di annunci remoti.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "ok",
+  "lastCount": 0,
+  "found": 20
  },
  {
   "id": "arbeitnow",
@@ -37,7 +53,11 @@
   "group": "C++ puro",
   "url": "https://www.arbeitnow.com/",
   "kind": "auto",
-  "note": "API pubblica, forte su Germania ed Europa."
+  "note": "API pubblica, forte su Germania ed Europa.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "ok",
+  "lastCount": 1,
+  "found": 900
  },
  {
   "id": "reddit",
@@ -45,7 +65,11 @@
   "group": "C++ puro",
   "url": "https://www.reddit.com/r/cpp/",
   "kind": "auto",
-  "note": "Thread trimestrale. Serve un'app Reddit gratuita (vedi README)."
+  "note": "Thread trimestrale. Serve un'app Reddit gratuita (vedi README).",
+  "lastRead": "2026-10-25",
+  "lastStatus": "non configurata",
+  "lastCount": 0,
+  "error": "mancano i secret REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET"
  },
  {
   "id": "jooble",
@@ -53,7 +77,11 @@
   "group": "Roma e Italia",
   "url": "https://it.jooble.org/",
   "kind": "auto",
-  "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane."
+  "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "non configurata",
+  "lastCount": 0,
+  "error": "manca il secret JOOBLE_API_KEY"
  },
  {
   "id": "adzuna",
@@ -61,7 +89,11 @@
   "group": "Roma e Italia",
   "url": "https://www.adzuna.it/",
   "kind": "auto",
-  "note": "API gratuita con chiave (vedi README)."
+  "note": "API gratuita con chiave (vedi README).",
+  "lastRead": "2026-10-25",
+  "lastStatus": "non configurata",
+  "lastCount": 0,
+  "error": "mancano i secret ADZUNA_APP_ID / ADZUNA_APP_KEY"
  },
  {
   "id": "workable",
@@ -69,7 +101,11 @@
   "group": "Studi e aziende",
   "url": "https://apply.workable.com/",
   "kind": "auto",
-  "note": "Pagine carriere degli studi: Rebellion verificato, gli altri slug da confermare al primo run."
+  "note": "Pagine carriere degli studi (Rebellion, Forgotten Empires, Climax).",
+  "lastRead": "2026-10-25",
+  "lastStatus": "ok",
+  "lastCount": 13,
+  "found": 71
  },
  {
   "id": "greenhouse",
@@ -77,15 +113,11 @@
   "group": "Studi e aziende",
   "url": "https://boards.greenhouse.io/",
   "kind": "auto",
-  "note": "Slug da confermare al primo run."
- },
- {
-  "id": "lever",
-  "name": "Studi su Lever",
-  "group": "Studi e aziende",
-  "url": "https://jobs.lever.co/",
-  "kind": "auto",
-  "note": "Slug da confermare al primo run."
+  "note": "People Can Fly: slug da confermare.",
+  "lastRead": "2026-10-25",
+  "lastStatus": "errore",
+  "lastCount": 0,
+  "error": "RuntimeError: People Can Fly: HTTPError 404 Client Error: Not Found for url: https://boards-api.greenhouse.io/v1/boards/"
  },
  {
   "id": "linkedin-c-roma",
