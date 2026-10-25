@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="repo" content="prophet98/cpp-job-radar">
+<meta name="robots" content="noindex">
+<title>C++ Job Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: strumento a colonna singola — testata compatta, barra filtri sticky, elenco a righe con punteggio a sinistra */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#141A21; --muted:#5B6672; --line:#DCE1E6;
+  --accent:#0E6B6B; --accent-soft:#DDEFEE;
+  --good:#1E7A3C; --good-soft:#E0F2E6; --warn:#9A6100; --warn-soft:#FBEFD8; --bad:#A33A2E; --bad-soft:#F8E3E0;
+  --new:#3D4FD6; --new-soft:#E6E9FC;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1419; --surface:#161D24; --ink:#E6EBF0; --muted:#93A0AD; --line:#26313B;
+  --accent:#4FC2BE; --accent-soft:#163233;
+  --good:#5FCB84; --good-soft:#14301F; --warn:#E3AE4E; --warn-soft:#352A12; --bad:#EE8274; --bad-soft:#3A1D19;
+  --new:#9AA6FF; --new-soft:#1E2347; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1419; --surface:#161D24; --ink:#E6EBF0; --muted:#93A0AD; --line:#26313B;
+  --accent:#4FC2BE; --accent-soft:#163233;
+  --good:#5FCB84; --good-soft:#14301F; --warn:#E3AE4E; --warn-soft:#352A12; --bad:#EE8274; --bad-soft:#3A1D19;
+  --new:#9AA6FF; --new-soft:#1E2347; color-scheme:dark}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand h1{font-family:var(--f-display);font-weight:750;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand p{margin:6px 0 0;color:var(--muted);max-width:60ch}
+.stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:76px}
+.stat b{font-family:var(--f-mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.stat.new b{color:var(--new)}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.row1{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{flex:1 1 240px;min-width:0;position:relative}
+.search input{width:100%;font:inherit;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted)}
+select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .n{font-family:var(--f-mono);font-size:11px;opacity:.7}
+.sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.btn{font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.btn:hover{color:var(--ink);border-color:var(--muted)}
+
+.meta-line{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:13px;padding:14px 0 6px}
+.meta-line code{font-family:var(--f-mono);font-size:12px}
+
+ol.jobs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.job{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:grid;grid-template-columns:64px 1fr;gap:0 16px;padding:14px 16px}
+.job.excluded{opacity:.62}
+.score{display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:2px}
+.dial{width:52px;height:52px;position:relative}
+.dial svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dial .val{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.score small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.body{min-width:0;display:flex;flex-direction:column;gap:6px}
+.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.head h2{font-family:var(--f-display);font-weight:600;font-size:18px;line-height:1.25;margin:0;text-wrap:balance}
+.head h2 a{color:inherit;text-decoration:none}
+.head h2 a:hover{text-decoration:underline;text-decoration-color:var(--accent)}
+.company{color:var(--muted);font-weight:500}
+.tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-size:12px;padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.tech{font-family:var(--f-mono);font-size:11.5px;color:var(--ink)}
+.pill.geo-ok{background:var(--good-soft);border-color:transparent;color:var(--good);font-weight:500}
+.pill.geo-verificare{background:var(--warn-soft);border-color:transparent;color:var(--warn);font-weight:500}
+.pill.geo-no{background:var(--bad-soft);border-color:transparent;color:var(--bad);font-weight:500}
+.pill.new{background:var(--new-soft);border-color:transparent;color:var(--new);font-weight:600}
+.pill.st-chiuso{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.facts{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:500}
+.facts .mono{font-family:var(--f-mono);font-size:12px}
+details{font-size:14px}
+details summary{cursor:pointer;color:var(--accent);font-size:13px;width:max-content;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"+ "}
+details[open] summary::before{content:"– "}
+.detail{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;padding-top:10px}
+.detail p{margin:0 0 6px;max-width:65ch}
+.note{font-size:13px;color:var(--muted)}
+.breakdown{list-style:none;margin:0;padding:10px 12px;border-radius:8px;background:var(--bg);font-size:13px;display:flex;flex-direction:column;gap:3px}
+.breakdown li{display:flex;justify-content:space-between;gap:12px}
+.breakdown li span:last-child{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.breakdown li.tot{border-top:1px solid var(--line);margin-top:4px;padding-top:4px;font-weight:600}
+
+.tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:16px}
+.tab{font:inherit;font-weight:600;font-size:14px;padding:7px 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.tab .n{font-family:var(--f-mono);font-size:11px;font-weight:400;opacity:.7}
+.spacer{flex:1}
+.refresh-status{font-size:13px;color:var(--muted);max-width:44ch}
+.btn{text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.btn.primary:hover{color:var(--surface);filter:brightness(1.08)}
+.btn:disabled{opacity:.55;cursor:default}
+.src-intro{margin:14px 0}
+.src-group{margin-bottom:22px}
+.src-group h3{font-family:var(--f-display);font-size:16px;margin:0 0 8px}
+.src-list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.src{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 14px;border-top:1px solid var(--line)}
+.src:first-child{border-top:0}
+.src a{font-weight:500}
+.src .sub{grid-column:1/-1;font-size:12.5px;color:var(--muted)}
+.src .right{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pill.st-ok{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.pill.st-parziale{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.pill.st-non-configurata{background:var(--bg);color:var(--muted)}
+.pill.st-errore{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:28px;text-align:center;color:var(--muted)}
+.empty h3{font-family:var(--f-display);color:var(--ink);margin:0 0 6px;font-size:18px}
+footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+footer p{margin:0;max-width:75ch}
+
+@media (max-width:640px){
+  .job{grid-template-columns:48px 1fr;gap:0 12px;padding:12px}
+  .dial{width:42px;height:42px}.dial .val{font-size:13px}
+  .detail{grid-template-columns:1fr}
+  .sep{display:none}
+}
+@media (prefers-reduced-motion:no-preference){.dial circle.arc{transition:stroke-dashoffset .4s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>C++ Job Radar</h1>
+      <p>C++, Unreal e Unity, livello mid o senior. Roma in sede o ibrido, oppure remoto aperto a chi vive in Italia. Gaming e non-gaming.</p>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><b id="s-total">–</b><span>Annunci</span></div>
+      <div class="stat"><b id="s-ok">–</b><span>Italia ok</span></div>
+      <div class="stat new"><b id="s-new">–</b><span>Nuovi</span></div>
+      <div class="stat"><b id="s-top">–</b><span>Match ≥ 70</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sezioni">
+    <button type="button" class="tab" id="tab-jobs" aria-selected="true">Annunci</button>
+    <button type="button" class="tab" id="tab-sources" aria-selected="false">Fonti <span class="n" id="src-count"></span></button>
+    <span class="spacer"></span>
+    <span class="refresh-status" id="refresh-status" aria-live="polite"></span>
+    <a class="btn primary" id="refresh" href="#" target="_blank" rel="noopener">Aggiorna ora</a>
+  </nav>
+
+  <section id="view-sources" hidden>
+    <p class="note src-intro">Le fonti <b>automatiche</b> vengono lette a ogni aggiornamento. Quelle <b>da controllare a mano</b> vietano o bloccano la lettura automatica: aprile tu ogni tanto. "Non configurata" vuol dire che manca una chiave gratuita (vedi README del progetto).</p>
+    <div id="sources"></div>
+  </section>
+
+  <section id="view-jobs">
+  <div class="bar" role="search">
+    <div class="row1">
+      <label class="search" for="q">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Cerca azienda, ruolo, tecnologia…" autocomplete="off">
+      </label>
+      <select id="sort" aria-label="Ordina per">
+        <option value="match">Ordina: match</option>
+        <option value="date">Ordina: più recenti</option>
+        <option value="salary">Ordina: stipendio</option>
+        <option value="company">Ordina: azienda A–Z</option>
+      </select>
+      <button class="btn" id="seen" type="button">Segna tutti come visti</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="meta-line">
+    <span id="updated">In attesa dei dati…</span>
+    <span id="shown"></span>
+  </div>
+
+  <ol class="jobs" id="list"></ol>
+  <div class="empty" id="empty" hidden>
+    <h3 id="empty-title">Nessun annuncio caricato</h3>
+    <p id="empty-text">Gli annunci compaiono qui dopo il primo aggiornamento. Premi "Aggiorna ora".</p>
+  </div>
+  </section>
+
+  <footer>
+    <p><b>Come si aggiorna.</b> "Aggiorna ora" apre GitHub: premi "Run workflow" e in 2–3 minuti uno script gratuito legge le fonti automatiche, classifica gli annunci con regole su parole chiave (sede, modalità, livello, duplicati) e aggiorna questa pagina. Gli annunci letti in automatico hanno dati da confermare sull'annuncio originale.</p>
+    <p><b>Geografia.</b> Il badge verde vuol dire che l'annuncio accetta chi vive in Italia. Quello giallo vuol dire che il remoto è indicato per un altro paese o non è chiaro: conviene chiedere al recruiter. Quello rosso vuol dire che l'Italia è esclusa, e questi annunci sono nascosti di default.</p>
+    <p><b>Match.</b> Il punteggio segue il CV 2026: C++ (25 punti), dominio fino a 35 punti (fisica e veicoli, simulazione, AI, gameplay, performance), Unreal (15), geografia (15) e livello (10). Uno stipendio sotto i 25k €/anno toglie 10 punti. Apri "Dettagli" per vedere come è composto. Gli stipendi sono quelli indicati dalla fonte; per ordinarli si usa una stima annua lorda in euro.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const LS_KEY = "jobradar.lastSeen";
+  let jobs = [];
+  let meta = null;
+  let lastSeen = null;
+  try { lastSeen = localStorage.getItem(LS_KEY); } catch(e) {}
+
+  const state = { q:"", sort:"match", where:"all", area:"all", tech:new Set(), level:"all", onlyNew:false, showUnclear:true, showExcluded:false };
+
+  // Profilo dal CV 2026: C++ | Multithreading | Interactive Systems; UE4/5, Chaos, Unity/C#;
+  // AI e fisica dei veicoli, profiling e debug; cerca anche software C++, simulazione e 3D interattivo fuori dal gaming.
+  // Cinque gruppi, massimo 100: linguaggio 25, dominio 35 (con tetto), motore 15, geografia 15, livello 10.
+  const DOMAIN_CAP = 35;
+  const GROUPS = [
+    { name:"Linguaggio", rules:[
+      { label:"C++ richiesto", pts:25, test:j=>has(j.tech,"C++") },
+      { label:"Solo Unity/C# (lo conosci, non è il focus)", pts:8, test:j=>!has(j.tech,"C++") && (has(j.tech,"Unity") || has(j.tech,"C#")) },
+    ], pick:"first" },
+    { name:"Dominio", rules:[
+      { label:"Fisica / veicoli / racing", pts:20, test:j=>has(j.spec,"physics") || has(j.spec,"vehicle") || has(j.spec,"racing") },
+      { label:"Simulazione / sistemi autonomi", pts:15, test:j=>has(j.spec,"simulation") },
+      { label:"AI", pts:12, test:j=>has(j.spec,"ai") },
+      { label:"Gameplay", pts:12, test:j=>has(j.spec,"gameplay") },
+      { label:"Engine / performance / tools", pts:10, test:j=>has(j.spec,"engine") || has(j.spec,"graphics") || has(j.spec,"tools") },
+      { label:"Embedded / Linux", pts:5, test:j=>has(j.spec,"embedded") },
+      { label:"Multiplayer / UI / XR", pts:4, test:j=>has(j.spec,"multiplayer") || has(j.spec,"ui") || has(j.spec,"xr") },
+    ], pick:"sum", cap:DOMAIN_CAP },
+    { name:"Motore", rules:[
+      { label:"Unreal Engine", pts:15, test:j=>has(j.tech,"Unreal") },
+      { label:"Unity", pts:5, test:j=>has(j.tech,"Unity") },
+    ], pick:"first" },
+    { name:"Geografia", rules:[
+      { label:"Italia ammessa", pts:15, test:j=>j.geo==="ok" },
+      { label:"Geografia da verificare", pts:5, test:j=>j.geo==="verificare" },
+    ], pick:"first" },
+    { name:"Livello", rules:[
+      { label:"Mid (in linea con i tuoi 5+ anni)", pts:10, test:j=>j.level==="mid" || j.level==="mid-senior" },
+      { label:"Senior (un piccolo salto)", pts:8, test:j=>j.level==="senior" },
+      { label:"Livello non indicato", pts:5, test:j=>!j.level || j.level==="n.d." },
+    ], pick:"first" },
+  ];
+  function has(arr,v){ return Array.isArray(arr) && arr.some(x=>String(x).toLowerCase()===v.toLowerCase()); }
+  function scoreOf(j){
+    const parts = [];
+    let total = 0;
+    for (const g of GROUPS){
+      const hit = g.rules.filter(r=>r.test(j));
+      if (!hit.length) continue;
+      if (g.pick==="first"){ parts.push({label:hit[0].label, pts:hit[0].pts}); total += hit[0].pts; continue; }
+      const sum = hit.reduce((a,r)=>a+r.pts,0);
+      hit.forEach(r=>parts.push({label:r.label, pts:r.pts}));
+      if (g.cap && sum > g.cap){ parts.push({label:`Tetto ${g.name.toLowerCase()} (max ${g.cap})`, pts:g.cap-sum}); total += g.cap; }
+      else total += sum;
+    }
+    if (j.salaryEur && j.salaryEur < 25000){ parts.push({label:"Stipendio sotto 25k €/anno", pts:-10}); total -= 10; }
+    if (j.status==="chiuso"){ parts.push({label:"Annuncio chiuso", pts:-40}); total -= 40; }
+    return { total: Math.max(0, Math.min(100,total)), parts };
+  }
+  function isNew(j){ return !lastSeen || (j.addedAt && j.addedAt > lastSeen); }
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function fmtDate(d){
+    if (!d) return "n.d.";
+    const t = new Date(d+"T12:00:00");
+    if (isNaN(t)) return esc(d);
+    return t.toLocaleDateString("it-IT",{day:"numeric",month:"short",year:"numeric"});
+  }
+  function safeUrl(u){ return /^https:\/\//i.test(u||"") ? u : null; }
+
+  const GEO_LABEL = { ok:"Italia ok", verificare:"Geografia da verificare", no:"Italia esclusa" };
+  const LEVEL_LABEL = { mid:"Mid", senior:"Senior", "mid-senior":"Mid–Senior", "n.d.":"Livello n.d." };
+  const MODE_LABEL = { remoto:"Remoto", ibrido:"Ibrido", sede:"In sede", "n.d.":"Modalità n.d." };
+  // Repository GitHub del sito: il pulsante "Aggiorna ora" apre la pagina del workflow.
+  const REPO = document.querySelector('meta[name="repo"]').content;
+  let sources = [];
+  const isRoma = j => (j.city||"").toLowerCase().includes("roma");
+
+  function matches(j){
+    if (j.geo==="no" && !state.showExcluded) return false;
+    if (j.geo==="verificare" && !state.showUnclear) return false;
+    if (state.where==="roma" && !isRoma(j)) return false;
+    if (state.where==="roma-ibrido" && !(isRoma(j) && (j.mode==="ibrido" || j.mode==="remoto"))) return false;
+    if (state.where==="remoto" && j.mode!=="remoto") return false;
+    if (state.area!=="all" && j.area!==state.area) return false;
+    if (state.level!=="all" && !(j.level===state.level || (j.level==="mid-senior"))) return false;
+    for (const t of state.tech) if (!has(j.tech,t)) return false;
+    if (state.onlyNew && !isNew(j)) return false;
+    if (state.q){
+      const hay = [j.company,j.title,j.location,j.summary,(j.tech||[]).join(" "),(j.spec||[]).join(" "),j.area].join(" ").toLowerCase();
+      if (!state.q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>hay.includes(w))) return false;
+    }
+    return true;
+  }
+  function sorter(a,b){
+    switch(state.sort){
+      case "date": return (b.posted||"0").localeCompare(a.posted||"0");
+      case "salary": return (b.salaryEur||-1) - (a.salaryEur||-1);
+      case "company": return (a.company||"").localeCompare(b.company||"");
+      default: return b._score.total - a._score.total || (b.posted||"0").localeCompare(a.posted||"0");
+    }
+  }
+
+  function chip(label, pressed, onClick, count){
+    const b = document.createElement("button");
+    b.type="button"; b.className="chip"; b.setAttribute("aria-pressed", pressed ? "true":"false");
+    b.innerHTML = esc(label) + (count!=null ? ` <span class="n">${count}</span>` : "");
+    b.addEventListener("click", onClick);
+    return b;
+  }
+  function sep(){ const s=document.createElement("span"); s.className="sep"; return s; }
+  function renderChips(){
+    const c = $("chips"); c.textContent="";
+    const visibleBase = jobs.filter(j=>j.geo!=="no" || state.showExcluded);
+    const cnt = (f)=>visibleBase.filter(f).length;
+    const whereTest = { roma:j=>isRoma(j), "roma-ibrido":j=>isRoma(j) && (j.mode==="ibrido" || j.mode==="remoto"), remoto:j=>j.mode==="remoto" };
+    [["all","Ovunque"],["roma","Roma (tutte le modalità)"],["roma-ibrido","Roma ibrido"],["remoto","Remoto"]].forEach(([v,l])=>c.append(chip(l, state.where===v, ()=>{state.where=v;render();}, v==="all"?null:cnt(whereTest[v]))));
+    c.append(sep());
+    [["all","Tutti gli ambiti"],["gaming","Gaming"],["non-gaming","Non-gaming"]].forEach(([v,l])=>c.append(chip(l, state.area===v, ()=>{state.area=v;render();}, v==="all"?null:cnt(j=>j.area===v))));
+    c.append(sep());
+    ["C++","Unreal","Unity"].forEach(t=>c.append(chip(t, state.tech.has(t), ()=>{ state.tech.has(t)?state.tech.delete(t):state.tech.add(t); render(); }, cnt(j=>has(j.tech,t)))));
+    c.append(sep());
+    [["all","Mid e senior"],["mid","Mid"],["senior","Senior"]].forEach(([v,l])=>c.append(chip(l, state.level===v, ()=>{state.level=v;render();})));
+    c.append(sep());
+    c.append(chip("Solo nuovi", state.onlyNew, ()=>{state.onlyNew=!state.onlyNew;render();}, jobs.filter(isNew).length));
+    c.append(chip("Includi da verificare", state.showUnclear, ()=>{state.showUnclear=!state.showUnclear;render();}, jobs.filter(j=>j.geo==="verificare").length));
+    c.append(chip("Mostra esclusi", state.showExcluded, ()=>{state.showExcluded=!state.showExcluded;render();}, jobs.filter(j=>j.geo==="no").length));
+  }
+
+  function dial(score){
+    const r=22, c=2*Math.PI*r, off=c*(1-score/100);
+    const col = score>=70 ? "var(--good)" : score>=45 ? "var(--accent)" : "var(--muted)";
+    return `<div class="dial" role="img" aria-label="Match ${score} su 100"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle class="arc" cx="26" cy="26" r="${r}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}"/></svg><span class="val">${score}</span></div>`;
+  }
+
+  function renderJob(j){
+    const li = document.createElement("li");
+    li.className = "job" + (j.geo==="no" || j.status==="chiuso" ? " excluded":"");
+    const url = safeUrl(j.url);
+    const s = j._score;
+    const tags = [];
+    if (isNew(j)) tags.push(`<span class="pill new">Nuovo</span>`);
+    tags.push(`<span class="pill geo-${esc(j.geo)}">${esc(GEO_LABEL[j.geo]||j.geo)}</span>`);
+    if (j.status==="chiuso") tags.push(`<span class="pill st-chiuso">Chiuso</span>`);
+    if (j.status==="verificare") tags.push(`<span class="pill">Apertura da riconfermare</span>`);
+    if (j.mode) tags.push(`<span class="pill">${esc(MODE_LABEL[j.mode]||j.mode)}</span>`);
+    if (j.level) tags.push(`<span class="pill">${esc(LEVEL_LABEL[j.level]||j.level)}</span>`);
+    tags.push(`<span class="pill">${j.area==="gaming"?"Gaming":"Non-gaming"}</span>`);
+    (j.tech||[]).forEach(t=>tags.push(`<span class="pill tech">${esc(t)}</span>`));
+    const breakdown = s.parts.map(p=>`<li><span>${esc(p.label)}</span><span>${p.pts>0?"+":""}${p.pts}</span></li>`).join("") + `<li class="tot"><span>Totale (max 100)</span><span>${s.total}</span></li>`;
+    li.innerHTML = `
+      <div class="score">${dial(s.total)}<small>match</small></div>
+      <div class="body">
+        <div class="head">
+          <h2>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(j.title)}</a>`:esc(j.title)}</h2>
+          <span class="company">${esc(j.company)}</span>
+        </div>
+        <div class="tags">${tags.join("")}</div>
+        <div class="facts">
+          <span>Sede: <b>${esc(j.location||"n.d.")}</b></span>
+          <span>Stipendio: <b>${esc(j.salary||"non indicato")}</b></span>
+          <span>Pubblicato: <b class="mono">${fmtDate(j.posted)}</b></span>
+          <span>Controllato: <span class="mono">${fmtDate(j.checkedAt)}</span></span>
+        </div>
+        <details>
+          <summary>Dettagli</summary>
+          <div class="detail">
+            <div>
+              <p>${esc(j.summary||"")}</p>
+              ${j.geoNote?`<p class="note"><b>Geografia:</b> ${esc(j.geoNote)}</p>`:""}
+              ${j.note?`<p class="note">${esc(j.note)}</p>`:""}
+              <p class="note">Fonte: ${esc(j.source||"n.d.")}${url?` · <a href="${esc(url)}" target="_blank" rel="noopener">Apri annuncio ↗</a>`:""}</p>
+            </div>
+            <ul class="breakdown" aria-label="Composizione del punteggio">${breakdown}</ul>
+          </div>
+        </details>
+      </div>`;
+    return li;
+  }
+
+  function render(){
+    jobs.forEach(j=>{ j._score = scoreOf(j); });
+    renderChips();
+    const visible = jobs.filter(matches).sort(sorter);
+    const list = $("list"); list.textContent="";
+    visible.forEach(j=>list.append(renderJob(j)));
+    const nonExcluded = jobs.filter(j=>j.geo!=="no" && j.status!=="chiuso");
+    $("s-total").textContent = nonExcluded.length;
+    $("s-ok").textContent = nonExcluded.filter(j=>j.geo==="ok").length;
+    $("s-new").textContent = nonExcluded.filter(isNew).length;
+    $("s-top").textContent = nonExcluded.filter(j=>j._score.total>=70).length;
+    $("shown").textContent = jobs.length ? `${visible.length} di ${jobs.length} mostrati` : "";
+    const empty = $("empty");
+    if (!jobs.length){ empty.hidden=false; $("empty-title").textContent="Nessun annuncio caricato"; $("empty-text").textContent="Gli annunci compaiono qui dopo il primo aggiornamento: premi \"Aggiorna ora\"."; }
+    else if (!visible.length){ empty.hidden=false; $("empty-title").textContent="Nessun annuncio con questi filtri"; $("empty-text").textContent="Togli qualche filtro o attiva \"Includi da verificare\"."; }
+    else empty.hidden=true;
+    if (meta){
+      const last = meta.lastUpdate ? fmtDate(meta.lastUpdate) : "n.d.";
+      $("updated").innerHTML = `Ultimo aggiornamento: <b>${last}</b>${meta.lastSummary?` · ${esc(meta.lastSummary)}`:""}`;
+    }
+    renderRefreshState();
+    renderSources();
+  }
+
+  function renderRefreshState(){
+    $("refresh").href = `https://github.com/${REPO}/actions/workflows/update.yml`;
+    $("refresh").title = "Apre GitHub: premi \"Run workflow\". In 2-3 minuti la pagina si aggiorna.";
+    $("refresh-status").textContent = "Su GitHub premi \u201cRun workflow\u201d; poi ricarica questa pagina tra 2\u20133 minuti.";
+  }
+
+  const GROUP_ORDER = ["C++ puro","Roma e Italia","Videogiochi","Studi e aziende","Da controllare a mano"];
+  const SRC_STATUS = { ok:"OK", parziale:"Parziale", errore:"Errore", "non configurata":"Non configurata" };
+  function renderSources(){
+    $("src-count").textContent = sources.length || "";
+    const box = $("sources"); box.textContent = "";
+    if (!sources.length){ box.innerHTML = `<div class="empty"><h3>Nessuna fonte caricata</h3><p>L'elenco delle fonti compare qui appena è disponibile.</p></div>`; return; }
+    const groups = {};
+    sources.forEach(s=>{ (groups[s.group||"Altro"] ||= []).push(s); });
+    const names = Object.keys(groups).sort((a,b)=>{ const ia=GROUP_ORDER.indexOf(a), ib=GROUP_ORDER.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
+    for (const g of names){
+      const sec = document.createElement("div"); sec.className="src-group";
+      const items = groups[g].sort((a,b)=> (a.kind===b.kind?0:(a.kind==="auto"?-1:1)) || (a.name||"").localeCompare(b.name||""));
+      sec.innerHTML = `<h3>${esc(g)} <span class="note">· ${items.length}</span></h3><ul class="src-list">${items.map(s=>{
+        const url = safeUrl(s.url);
+        const st = s.kind==="auto" && s.lastStatus ? `<span class="pill st-${esc(s.lastStatus.replace(/\s+/g,"-"))}">${esc(SRC_STATUS[s.lastStatus]||s.lastStatus)}${s.lastCount!=null?` · ${Number(s.lastCount)||0}`:""}</span>` : "";
+        return `<li class="src"><span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`:esc(s.name)}</span>
+          <span class="right"><span class="pill">${s.kind==="auto"?"Automatica":"Manuale"}</span>${st}</span>
+          <span class="sub">${esc(s.note||"")}${s.lastRead?` · letta il ${fmtDate(s.lastRead)}`:""}${s.error?` · ${esc(s.error)}`:""}</span></li>`;
+      }).join("")}</ul>`;
+      box.append(sec);
+    }
+  }
+
+  function showTab(which){
+    const jobsOn = which==="jobs";
+    $("view-jobs").hidden = !jobsOn; $("view-sources").hidden = jobsOn;
+    $("tab-jobs").setAttribute("aria-selected", jobsOn); $("tab-sources").setAttribute("aria-selected", !jobsOn);
+  }
+  $("tab-jobs").addEventListener("click", ()=>showTab("jobs"));
+  $("tab-sources").addEventListener("click", ()=>showTab("sources"));
+  if (location.hash==="#fonti") showTab("sources");
+
+  $("q").addEventListener("input", (e)=>{ state.q = e.target.value.trim(); render(); });
+  $("sort").addEventListener("change", (e)=>{ state.sort = e.target.value; render(); });
+  $("seen").addEventListener("click", ()=>{
+    const latest = jobs.reduce((m,j)=> (j.addedAt && j.addedAt>m) ? j.addedAt : m, "0000");
+    lastSeen = latest;
+    try { localStorage.setItem(LS_KEY, latest); } catch(e) {}
+    state.onlyNew = false;
+    render();
+  });
+
+  render();
+
+  async function loadJson(name){
+    const r = await fetch(`data/${name}?v=${Date.now()}`, { cache:"no-store" });
+    if (!r.ok) throw new Error(name + " " + r.status);
+    return r.json();
+  }
+  (async ()=>{
+    try {
+      const [j, s, m] = await Promise.all([loadJson("jobs.json"), loadJson("sources.json").catch(()=>[]), loadJson("meta.json").catch(()=>null)]);
+      jobs = Array.isArray(j) ? j : [];
+      sources = Array.isArray(s) ? s : [];
+      meta = m;
+      render();
+    } catch(e){
+      $("updated").textContent = "Impossibile leggere gli annunci. Ricarica la pagina tra poco.";
+    }
+  })();
+})();
+</script>
+
+</body>
+</html>
