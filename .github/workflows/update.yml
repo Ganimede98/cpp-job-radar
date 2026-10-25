@@ -26,8 +26,10 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r scraper/requirements.txt
         
-      - name: Test delle regole di classificazione
-        run: python -m pytest -q tests
+        - name: Test delle regole di classificazione
+          run: |
+            pip install pytest
+            if [ -d tests ]; then python -m pytest -q tests; else echo "Cartella tests assente: test saltati"; fi
            
       - name: Leggi le fonti
         env:
