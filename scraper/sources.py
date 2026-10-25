@@ -46,6 +46,9 @@ def iso_from_text(value):
 # ---------------------------------------------------------------- Hacker News
 
 
+RE_HN_ROLE = re.compile(r"(?:(?:senior|staff|sr\.?|mid|lead)\s+)?[\w+#/.\- ]{0,40}?(?:engineer|developer|programmer)s?", re.I)
+
+
 def hn_who_is_hiring(cfg):
 	story = get("https://hn.algolia.com/api/v1/search_by_date", params={"query": "\"who is hiring\"", "tags": "story,author_whoishiring", "hitsPerPage": 5}).json()
 	hits = [h for h in story.get("hits", []) if "who is hiring" in (h.get("title") or "").lower()]
@@ -65,7 +68,10 @@ def hn_who_is_hiring(cfg):
 			if len(parts) < 2:
 				continue
 			company = parts[0]
-			role = next((p for p in parts[1:] if re.search(r"engineer|developer|programmer", p, re.I)), parts[1])
+			role = next((p for p in parts[1:] if RE_HN_ROLE.search(p)), None)
+			if not role:
+				m = RE_HN_ROLE.search(text)
+				role = m.group(0).strip() if m else parts[1]
 			location = " | ".join(p for p in parts[1:] if re.search(r"remote|onsite|on-site|hybrid|\b[A-Z][a-z]+,|europe|eu\b|anywhere", p, re.I))
 			out.append({
 				"company": company,
@@ -156,16 +162,28 @@ def arbeitnow(cfg):
 
 def workable(cfg):
 	def fetch(company):
-		out = []
 		data = get(f"https://apply.workable.com/api/v1/widget/accounts/{company['slug']}").json()
+		# Workable pubblica lo stesso annuncio una volta per paese: li raggruppo per titolo
+		# e raccolgo i paesi ammessi, così la geografia si decide sull'elenco completo.
+		groups = {}
 		for j in data.get("jobs", []):
-			loc = ", ".join(x for x in (j.get("city"), j.get("country")) if x)
+			g = groups.setdefault(j.get("title"), {"job": j, "countries": set(), "remote": False, "cities": set()})
+			if j.get("country"):
+				g["countries"].add(j["country"])
+			if j.get("city"):
+				g["cities"].add(j["city"])
+			g["remote"] = g["remote"] or bool(j.get("telecommuting"))
+		out = []
+		for title, g in groups.items():
+			j = g["job"]
+			countries = sorted(g["countries"])
 			out.append({
 				"company": company.get("name") or data.get("name"),
-				"title": j.get("title"),
+				"title": title,
 				"url": j.get("url") or j.get("application_url"),
-				"location": ("Remoto · " if j.get("telecommuting") else "") + loc,
-				"remote": bool(j.get("telecommuting")),
+				"location": ("Remoto · " if g["remote"] else "") + ", ".join(sorted(g["cities"]) + countries),
+				"remote": g["remote"],
+				"countries": countries if g["remote"] else [],
 				"description": f"{j.get('department') or ''} {j.get('function') or ''}",
 				"posted": iso_from_text(j.get("published_on")),
 				"gaming": company.get("gaming", True),

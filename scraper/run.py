@@ -65,7 +65,7 @@ def main():
 			raw_jobs = reader(src)
 			kept = 0
 			for raw in raw_jobs:
-				job = classify(raw, raw.get("default_tech"))
+				job = classify(raw, raw.get("default_tech"), CONFIG.get("excludeGaming", False))
 				if not job or too_old(job.get("posted"), CONFIG.get("maxAgeDays", 150)):
 					continue
 				job["priority"] = src.get("priority", 1)

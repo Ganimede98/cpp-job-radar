@@ -1,5 +1,5 @@
 {
-  "_nota": "Fonti lette dallo scraper. 'priority': più alto = URL preferito quando lo stesso annuncio arriva da più fonti. Se una fonte ATS risulta in errore, controlla lo slug dell'azienda.",
+  "_nota": "Fonti lette dallo scraper. excludeGaming=false: gaming e non-gaming insieme (metti true per tenere solo il non-gaming). 'priority': più alto = URL preferito quando lo stesso annuncio arriva da più fonti. Se una fonte mostra 'Parziale', uno degli slug è sbagliato.",
   "maxAgeDays": 150,
   "closeAfterMissingRuns": 2,
   "sources": [
@@ -12,7 +12,9 @@
       "priority": 3,
       "queries": [
         "C++",
-        "Unreal"
+        "Unreal",
+        "embedded",
+        "Qt"
       ],
       "note": "Thread mensile letto via API Algolia."
     },
@@ -35,33 +37,19 @@
       "queries": [
         "C++",
         "Unreal Engine",
-        "game engine"
+        "game engine",
+        "gameplay programmer",
+        "graphics programmer",
+        "embedded C++",
+        "Qt C++",
+        "simulation",
+        "real-time",
+        "robotics",
+        "computer vision",
+        "low latency"
       ],
       "pages": 2,
-      "note": "API ufficiale: solo remoti che ammettono l'Italia."
-    },
-    {
-      "id": "remotive",
-      "type": "remotive",
-      "name": "Remotive",
-      "group": "C++ puro",
-      "url": "https://remotive.com/",
-      "priority": 2,
-      "queries": [
-        "c++",
-        "unreal"
-      ],
-      "note": "API pubblica di annunci remoti."
-    },
-    {
-      "id": "arbeitnow",
-      "type": "arbeitnow",
-      "name": "Arbeitnow",
-      "group": "C++ puro",
-      "url": "https://www.arbeitnow.com/",
-      "priority": 1,
-      "pages": 3,
-      "note": "API pubblica, forte su Germania ed Europa."
+      "note": "API ufficiale: solo remoti che ammettono l'Italia. Ricerche gaming (Unreal, engine, gameplay, grafica) e non-gaming (embedded, Qt, simulazione, robotica, visione, bassa latenza)."
     },
     {
       "id": "reddit",
@@ -91,6 +79,26 @@
           "location": "Roma"
         },
         {
+          "keywords": "sviluppatore C++",
+          "location": "Roma"
+        },
+        {
+          "keywords": "C++ embedded",
+          "location": "Roma"
+        },
+        {
+          "keywords": "Qt C++",
+          "location": "Roma"
+        },
+        {
+          "keywords": "C++ simulazione",
+          "location": "Italia"
+        },
+        {
+          "keywords": "C++ full remote",
+          "location": "Italia"
+        },
+        {
           "keywords": "Unreal Engine",
           "location": "Italia"
         }
@@ -116,6 +124,22 @@
           "where": "Roma"
         },
         {
+          "what": "c++ embedded",
+          "where": "Roma"
+        },
+        {
+          "what": "qt c++",
+          "where": "Roma"
+        },
+        {
+          "what": "c++ simulazione",
+          "where": ""
+        },
+        {
+          "what": "c++ remoto",
+          "where": ""
+        },
+        {
           "what": "unreal engine",
           "where": "Italia"
         }
@@ -130,14 +154,6 @@
       "url": "https://apply.workable.com/",
       "priority": 4,
       "companies": [
-        {
-          "name": "Rebellion",
-          "slug": "rebellion",
-          "tech": [
-            "C++"
-          ],
-          "gaming": true
-        },
         {
           "name": "Forgotten Empires",
           "slug": "forgotten-empires",
@@ -155,29 +171,94 @@
             "Unreal"
           ],
           "gaming": true
-        }
-      ],
-      "note": "Pagine carriere degli studi (Rebellion, Forgotten Empires, Climax)."
-    },
-    {
-      "id": "greenhouse",
-      "type": "greenhouse",
-      "name": "Studi su Greenhouse",
-      "group": "Studi e aziende",
-      "url": "https://boards.greenhouse.io/",
-      "priority": 4,
-      "companies": [
+        },
         {
-          "name": "People Can Fly",
-          "slug": "peoplecanfly",
+          "name": "Astrid Entertainment",
+          "slug": "astrid-entertainment",
           "tech": [
             "C++",
             "Unreal"
           ],
           "gaming": true
+        },
+        {
+          "name": "Rebellion",
+          "slug": "rebellion",
+          "tech": [
+            "C++"
+          ],
+          "gaming": true
         }
       ],
-      "note": "People Can Fly: slug da confermare."
+      "note": "Studi di videogiochi che assumono anche in remoto UE. Slug verificati il 26/10/2026."
+    },
+    {
+      "id": "greenhouse",
+      "type": "greenhouse",
+      "name": "Aziende C++ su Greenhouse",
+      "group": "Studi e aziende",
+      "url": "https://boards.greenhouse.io/",
+      "priority": 4,
+      "companies": [
+        {
+          "name": "Canonical",
+          "slug": "canonical",
+          "gaming": false
+        },
+        {
+          "name": "Mozilla",
+          "slug": "mozilla",
+          "gaming": false
+        },
+        {
+          "name": "Brave",
+          "slug": "brave",
+          "gaming": false
+        },
+        {
+          "name": "MariaDB",
+          "slug": "mariadbplc",
+          "gaming": false
+        },
+        {
+          "name": "Databento",
+          "slug": "databento",
+          "gaming": false
+        }
+      ],
+      "note": "Aziende C++ che assumono in remoto: Canonical (Ubuntu), Mozilla (Firefox), Brave (Chromium), MariaDB, Databento. Slug verificati il 26/10/2026."
+    },
+    {
+      "id": "ashby",
+      "type": "ashby",
+      "name": "Aziende C++ su Ashby",
+      "group": "Studi e aziende",
+      "url": "https://jobs.ashbyhq.com/",
+      "priority": 4,
+      "companies": [
+        {
+          "name": "ClickHouse",
+          "slug": "clickhouse",
+          "gaming": false
+        }
+      ],
+      "note": "Database in C++, molti ruoli remoti. Slug verificato il 26/10/2026."
+    },
+    {
+      "id": "lever",
+      "type": "lever",
+      "name": "Studi su Lever",
+      "group": "Studi e aziende",
+      "url": "https://jobs.lever.co/",
+      "priority": 4,
+      "companies": [
+        {
+          "name": "Xsolla",
+          "slug": "xsolla",
+          "gaming": true
+        }
+      ],
+      "note": "Xsolla: ruoli Unreal e remoti in Europa. Slug verificato il 26/10/2026."
     }
   ],
   "manual": [
@@ -271,5 +352,6 @@
       "url": "https://www.italiancpp.org/",
       "note": "Meetup e contatti."
     }
-  ]
+  ],
+  "excludeGaming": false
 }

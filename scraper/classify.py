@@ -10,7 +10,7 @@ import html
 import re
 
 # Versione delle regole: quando cambia, gli annunci automatici classificati con regole vecchie vengono rivalutati.
-RULES_VERSION = 2
+RULES_VERSION = 5
 
 # ---------------------------------------------------------------- testo
 
@@ -18,6 +18,7 @@ RULES_VERSION = 2
 def strip_html(text):
 	if not text:
 		return ""
+	text = html.unescape(text)  # alcune API (Greenhouse) mandano l'HTML già "escapato"
 	text = re.sub(r"<[^>]+>", " ", text)
 	text = html.unescape(text)
 	return re.sub(r"\s+", " ", text).strip()
@@ -38,6 +39,9 @@ RE_CPP = re.compile(r"c\+\+|\bcpp\b|c/c\+\+", re.I)
 RE_UNREAL = re.compile(r"unreal|\bue\s?[45]\b", re.I)
 RE_UNITY = re.compile(r"\bunity\b", re.I)
 RE_CSHARP = re.compile(r"c#|\.net\b", re.I)
+RE_QT = re.compile(r"\bqt\b|\bqml\b", re.I)
+RE_LINUX = re.compile(r"\blinux\b|\bposix\b|yocto|embedded linux", re.I)
+RE_MODERN_CPP = re.compile(r"c\+\+ ?(1[47]|2[03])\b|modern c\+\+", re.I)
 RE_OFF_TOPIC_ROLE = re.compile(r"\b(back-?end|front-?end|full-?stack|react|web|android|ios|devops|sre|site reliability|data (engineer|scientist|analyst)|qa|security|sales|marketing|recruit\w*)\b", re.I)
 RE_DEV_ROLE = re.compile(r"engineer|programmer|developer|sviluppatore|programmatore|software|coder|ingegnere", re.I)
 
@@ -52,24 +56,36 @@ def detect_tech(text):
 		tech.append("Unity")
 	if RE_CSHARP.search(text):
 		tech.append("C#")
+	if RE_QT.search(text):
+		tech.append("Qt")
+	if RE_LINUX.search(text):
+		tech.append("Linux")
+	if RE_MODERN_CPP.search(text):
+		tech.append("C++ moderno")
 	return tech
 
 
 # ---------------------------------------------------------------- ambito e specialità
 
-RE_GAMING = re.compile(r"\bgame|gaming|videogam|gameplay|studio[s]?\b.*\bgame|unreal|unity|playstation|xbox|nintendo|steam\b", re.I)
+# Unreal e Unity da soli non bastano: si usano anche in simulazione, XR e industria.
+RE_GAMING = re.compile(r"\bgames?\b|gaming|videogam|gameplay|playstation|xbox|nintendo|\bsteam\b", re.I)
 
 SPEC_RULES = [
 	("gameplay", r"gameplay|game ?play|game mechanics|meccaniche di gioco"),
 	("physics", r"physics|fisica|chaos|rigid ?body|collision"),
-	("vehicle", r"vehicle|veicol|driving|car physics|automotive|racing|motorsport"),
+	("vehicle", r"vehic|veicol|driving|car physics|automotive|racing|motorsport"),
 	("racing", r"racing|motorsport|race game|corse"),
 	("simulation", r"simulat|digital twin|autonomous|sistemi autonomi|real[- ]time sim"),
 	("ai", r"\bai programmer|\bgame ai\b|artificial intelligence|behaviou?r tree|navigation|pathfinding|\bai engineer"),
 	("engine", r"engine programmer|engine developer|core tech|performance|optimi[sz]|profil|multithread|low[- ]level"),
 	("graphics", r"graphics|render|shader|vulkan|directx|opengl"),
 	("tools", r"tools programmer|tools engineer|editor tool|pipeline tool"),
-	("embedded", r"embedded|firmware|rtos|microcontroll|fpga|linux kernel|driver"),
+	("embedded", r"embedded|firmware|rtos|microcontroll|fpga|linux kernel|driver|real[- ]time"),
+	("robotics", r"robot|motion planning|\bros2?\b|autonom|drone|uav"),
+	("vision", r"computer vision|visione artificiale|opencv|perception|point cloud|lidar|slam"),
+	("hpc", r"\bhpc\b|high[- ]performance computing|cuda|simd|vectori[sz]|gpu comput|parallel comput"),
+	("systems", r"database|storage|distributed|kernel|compiler|llvm|browser|chromium|operating system|networking stack|low[- ]latency"),
+	("dsp", r"signal processing|\bdsp\b|radar|sonar|\bsar\b|audio|telecom|5g"),
 	("multiplayer", r"multiplayer|network(ing)? (programmer|engineer|code)|netcode|online services"),
 	("ui", r"\bui\b|user interface|umg|\bqt\b|frontend"),
 	("xr", r"\bxr\b|\bvr\b|\bar\b|virtual reality|augmented reality|mixed reality"),
@@ -101,7 +117,7 @@ def detect_level(title):
 # ---------------------------------------------------------------- modalità e geografia
 
 RE_HYBRID = re.compile(r"hybrid|ibrid|smart working|\d\s?\+\s?\d", re.I)
-RE_REMOTE = re.compile(r"remote|remoto|da remoto|telelavoro|work from home|wfh|anywhere|fully distributed", re.I)
+RE_REMOTE = re.compile(r"remote|remoto|da remoto|telelavoro|work from home|wfh|home[- ]based|anywhere|fully distributed", re.I)
 RE_ONSITE = re.compile(r"on-?site|in sede|in presenza|in office|office-based", re.I)
 RE_ROME = re.compile(r"\b(roma|rome|frascati|fiumicino|pomezia|tivoli|guidonia)\b", re.I)
 RE_ITALY = re.compile(r"\b(italy|italia|italian|milano|milan|torino|turin|bologna|napoli|naples|firenze|florence|pisa|padova|verona)\b", re.I)
@@ -128,6 +144,8 @@ def detect_geo(location, text, remote, countries, title=""):
 	both = f"{loc} {text}"
 	if RE_ROME.search(loc) or (not loc and RE_ROME.search(text)):
 		return "ok", "Roma", "Sede a Roma o dintorni."
+	if remote and (RE_ITALY.search(title) or RE_EU_OK.search(title)):
+		return "ok", "", "Il titolo dell'annuncio indica Italia/Europa."
 	if countries:
 		names = " ".join(countries)
 		if RE_ITALY.search(names) or re.search(r"\b(eu|europe|emea)\b", names, re.I):
@@ -188,7 +206,7 @@ def salary_text(min_v, max_v, currency, period):
 # ---------------------------------------------------------------- classificazione completa
 
 
-def classify(raw, default_tech=None):
+def classify(raw, default_tech=None, exclude_gaming=False):
 	"""Trasforma un annuncio grezzo in un documento per il sito, o None se scartato.
 
 	raw: dict con company, title, url, location, remote (bool|None), countries (list),
@@ -224,6 +242,10 @@ def classify(raw, default_tech=None):
 	if not tech:
 		return None
 	gaming = bool(RE_GAMING.search(text)) or raw.get("gaming") is True
+	if exclude_gaming and gaming:
+		return None  # focus attuale: solo C++ fuori dal gaming
+	if exclude_gaming and "C++" not in tech:
+		return None  # fuori dal gaming serve C++ esplicito (Unreal/Unity da soli non bastano)
 	# Unity/C# senza C++ né Unreal interessa solo nel gaming.
 	if "C++" not in tech and "Unreal" not in tech and not gaming:
 		return None

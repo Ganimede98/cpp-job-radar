@@ -22,6 +22,10 @@ Funziona da solo e gratis su GitHub, senza abbonamenti:
 Il pulsante **Aggiorna ora** del sito apre la pagina del workflow su GitHub: premi *Run workflow* e ricarica il sito dopo 2–3 minuti.
 Per un aggiornamento automatico ogni mattina togli il `#` dalle righe `schedule` in `.github/workflows/update.yml`. È comunque gratis.
 
+## Gaming e non-gaming
+
+Lo scraper raccoglie entrambi. Il punteggio di match nel sito usa due profili: uno per i ruoli gaming (Unreal, gameplay, fisica dei veicoli) e uno per il C++ non-gaming (simulazione, real-time ed embedded, robotica, sistemi, Qt). In `scraper/config.json`, `"excludeGaming": true` terrebbe solo il non-gaming.
+
 ## Fonti
 
 Sempre attive, senza chiavi:
@@ -30,9 +34,13 @@ Sempre attive, senza chiavi:
 |---|---|
 | Hacker News – Who is hiring? | API Algolia |
 | Meeting C++ Jobs | pagina HTML |
-| Himalayas | API ufficiale (solo remoti che ammettono l'Italia) |
-| Remotive, Arbeitnow | API pubbliche |
-| Studi su Workable, Greenhouse, Lever | API pubbliche delle pagine carriere |
+| Himalayas | API ufficiale, ricerche mirate (C++, Unreal, engine, simulazione, embedded, grafica); solo remoti che ammettono l'Italia |
+| Studi su Workable | Forgotten Empires, Climax Studios, Astrid Entertainment, Rebellion |
+| Aziende su Greenhouse | Canonical, Mozilla |
+| Aziende su Ashby | ClickHouse |
+| Aziende su Lever | Xsolla |
+
+Gli slug degli studi sono stati verificati il 26/10/2026. Remotive e Arbeitnow sono stati tolti: su centinaia di annunci letti ne restavano 0–1 pertinenti.
 
 Facoltative, con chiave **gratuita** (in *Settings → Secrets and variables → Actions → New repository secret*):
 
@@ -61,6 +69,14 @@ Lo scraper non usa intelligenza artificiale: applica regole su parole chiave (`s
 - Gli annunci con `"origin": "seed"` in `docs/data/jobs.json` sono quelli verificati a mano: lo scraper non li modifica né li chiude. Cancellali a mano quando non servono più.
 
 Il punteggio di **match** è calcolato nel sito (`docs/index.html`, funzione `scoreOf`).
+
+## Test
+
+`tests/test_classify.py` contiene casi reali (annunci da tenere e da scartare). Il workflow li esegue prima di ogni aggiornamento: se una modifica alle regole li rompe, l'aggiornamento si ferma e i dati del sito restano intatti.
+
+```bash
+python -m pytest -q tests
+```
 
 ## Prova in locale
 

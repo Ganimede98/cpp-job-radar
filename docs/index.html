@@ -200,7 +200,7 @@ footer p{margin:0;max-width:75ch}
   <footer>
     <p><b>Come si aggiorna.</b> "Aggiorna ora" apre GitHub: premi "Run workflow" e in 2–3 minuti uno script gratuito legge le fonti automatiche, classifica gli annunci con regole su parole chiave (sede, modalità, livello, duplicati) e aggiorna questa pagina. Gli annunci letti in automatico hanno dati da confermare sull'annuncio originale.</p>
     <p><b>Geografia.</b> Il badge verde vuol dire che l'annuncio accetta chi vive in Italia. Quello giallo vuol dire che il remoto è indicato per un altro paese o non è chiaro: conviene chiedere al recruiter. Quello rosso vuol dire che l'Italia è esclusa, e questi annunci sono nascosti di default.</p>
-    <p><b>Match.</b> Il punteggio segue il CV 2026: C++ (25 punti), dominio fino a 35 punti (fisica e veicoli, simulazione, AI, gameplay, performance), Unreal (15), geografia (15) e livello (10). Uno stipendio sotto i 25k €/anno toglie 10 punti. Apri "Dettagli" per vedere come è composto. Gli stipendi sono quelli indicati dalla fonte; per ordinarli si usa una stima annua lorda in euro.</p>
+    <p><b>Match.</b> Il punteggio segue il CV 2026 con due profili. Gaming: C++ (25), dominio fino a 35 (fisica e veicoli, simulazione, AI, gameplay, performance), Unreal (15), geografia (15), livello (10). Non-gaming: C++ (25), dominio fino a 35 (simulazione, veicoli, real-time ed embedded, robotica, grafica, sistemi), stack (15: C++ moderno, Linux o Qt), geografia (15), livello (10). Uno stipendio sotto i 25k €/anno toglie 10 punti. Apri "Dettagli" per vedere come è composto. Gli stipendi sono quelli indicati dalla fonte; per ordinarli si usa una stima annua lorda in euro.</p>
   </footer>
 </div>
 
@@ -219,7 +219,8 @@ footer p{margin:0;max-width:75ch}
   // AI e fisica dei veicoli, profiling e debug; cerca anche software C++, simulazione e 3D interattivo fuori dal gaming.
   // Cinque gruppi, massimo 100: linguaggio 25, dominio 35 (con tetto), motore 15, geografia 15, livello 10.
   const DOMAIN_CAP = 35;
-  const GROUPS = [
+  // Due profili di punteggio dal CV 2026: uno per i ruoli gaming (invariato), uno per il C++ non-gaming.
+  const GAMING_GROUPS = [
     { name:"Linguaggio", rules:[
       { label:"C++ richiesto", pts:25, test:j=>has(j.tech,"C++") },
       { label:"Solo Unity/C# (lo conosci, non è il focus)", pts:8, test:j=>!has(j.tech,"C++") && (has(j.tech,"Unity") || has(j.tech,"C#")) },
@@ -247,11 +248,43 @@ footer p{margin:0;max-width:75ch}
       { label:"Livello non indicato", pts:5, test:j=>!j.level || j.level==="n.d." },
     ], pick:"first" },
   ];
+  const NON_GAMING_GROUPS = [
+    { name:"Linguaggio", rules:[
+      { label:"C++ richiesto", pts:25, test:j=>has(j.tech,"C++") },
+    ], pick:"first" },
+    { name:"Dominio", rules:[
+      { label:"Simulazione / sistemi autonomi", pts:20, test:j=>has(j.spec,"simulation") },
+      { label:"Fisica / veicoli / automotive", pts:20, test:j=>has(j.spec,"physics") || has(j.spec,"vehicle") || has(j.spec,"racing") },
+      { label:"Real-time / embedded", pts:12, test:j=>has(j.spec,"embedded") },
+      { label:"Robotica / visione", pts:12, test:j=>has(j.spec,"robotics") || has(j.spec,"vision") },
+      { label:"Grafica 3D", pts:12, test:j=>has(j.spec,"graphics") || has(j.spec,"xr") },
+      { label:"Performance / sistemi / HPC", pts:10, test:j=>has(j.spec,"engine") || has(j.spec,"systems") || has(j.spec,"hpc") || has(j.spec,"tools") },
+      { label:"AI", pts:8, test:j=>has(j.spec,"ai") },
+      { label:"Segnali / DSP / radar", pts:8, test:j=>has(j.spec,"dsp") },
+      { label:"Interfacce Qt / UI", pts:6, test:j=>has(j.spec,"ui") },
+      { label:"Rete / multiplayer", pts:4, test:j=>has(j.spec,"multiplayer") },
+      { label:"Gameplay", pts:4, test:j=>has(j.spec,"gameplay") },
+    ], pick:"sum", cap:DOMAIN_CAP },
+    { name:"Stack", rules:[
+      { label:"C++ moderno / Linux / Qt", pts:15, test:j=>has(j.tech,"C++ moderno") || has(j.tech,"Linux") || has(j.tech,"Qt") },
+      { label:"Unreal (simulazione)", pts:10, test:j=>has(j.tech,"Unreal") },
+      { label:"Stack non indicato", pts:5, test:j=>has(j.tech,"C++") },
+    ], pick:"first" },
+    { name:"Geografia", rules:[
+      { label:"Italia ammessa", pts:15, test:j=>j.geo==="ok" },
+      { label:"Geografia da verificare", pts:5, test:j=>j.geo==="verificare" },
+    ], pick:"first" },
+    { name:"Livello", rules:[
+      { label:"Mid (in linea con i tuoi 5+ anni)", pts:10, test:j=>j.level==="mid" || j.level==="mid-senior" },
+      { label:"Senior (un piccolo salto)", pts:8, test:j=>j.level==="senior" },
+      { label:"Livello non indicato", pts:5, test:j=>!j.level || j.level==="n.d." },
+    ], pick:"first" },
+  ];
   function has(arr,v){ return Array.isArray(arr) && arr.some(x=>String(x).toLowerCase()===v.toLowerCase()); }
   function scoreOf(j){
     const parts = [];
     let total = 0;
-    for (const g of GROUPS){
+    for (const g of (j.area==="gaming" ? GAMING_GROUPS : NON_GAMING_GROUPS)){
       const hit = g.rules.filter(r=>r.test(j));
       if (!hit.length) continue;
       if (g.pick==="first"){ parts.push({label:hit[0].label, pts:hit[0].pts}); total += hit[0].pts; continue; }
@@ -324,7 +357,7 @@ footer p{margin:0;max-width:75ch}
     c.append(sep());
     [["all","Tutti gli ambiti"],["gaming","Gaming"],["non-gaming","Non-gaming"]].forEach(([v,l])=>c.append(chip(l, state.area===v, ()=>{state.area=v;render();}, v==="all"?null:cnt(j=>j.area===v))));
     c.append(sep());
-    ["C++","Unreal","Unity"].forEach(t=>c.append(chip(t, state.tech.has(t), ()=>{ state.tech.has(t)?state.tech.delete(t):state.tech.add(t); render(); }, cnt(j=>has(j.tech,t)))));
+    ["C++","Unreal","Unity","Qt","Linux"].forEach(t=>c.append(chip(t, state.tech.has(t), ()=>{ state.tech.has(t)?state.tech.delete(t):state.tech.add(t); render(); }, cnt(j=>has(j.tech,t)))));
     c.append(sep());
     [["all","Mid e senior"],["mid","Mid"],["senior","Senior"]].forEach(([v,l])=>c.append(chip(l, state.level===v, ()=>{state.level=v;render();})));
     c.append(sep());
