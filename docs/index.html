@@ -464,7 +464,7 @@ footer p{margin:0;max-width:75ch}
         const st = s.kind==="auto" && s.lastStatus ? `<span class="pill st-${esc(s.lastStatus.replace(/\s+/g,"-"))}">${esc(SRC_STATUS[s.lastStatus]||s.lastStatus)}${s.lastCount!=null?` · ${Number(s.lastCount)||0} pertinenti`:""}${s.found?` su ${Number(s.found)}`:""}${s.newCount?` · ${Number(s.newCount)} nuovi`:""}</span>` : "";
         return `<li class="src"><span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`:esc(s.name)}</span>
           <span class="right"><span class="pill">${s.kind==="auto"?"Automatica":"Manuale"}</span>${st}</span>
-          <span class="sub">${esc(s.note||"")}${s.lastRead?` · letta il ${fmtDate(s.lastRead)}`:""}${s.error?` · ${esc(s.error)}`:""}</span></li>`;
+          <span class="sub">${esc(s.note||"")}${s.lastRead?` · letta il ${fmtDate(s.lastRead)}`:""}${s.error?` · ${esc(s.error)}`:""}${s.rejected && Object.keys(s.rejected).length ? ` · scartati: ${esc(Object.entries(s.rejected).slice(0,4).map(([k,v])=>`${k} (${v})`).join(", "))}` : ""}</span></li>`;
       }).join("")}</ul>`;
       box.append(sec);
     }

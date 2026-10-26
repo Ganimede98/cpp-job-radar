@@ -334,7 +334,7 @@ def jooble(cfg):
 		raise SkipSource("manca il secret JOOBLE_API_KEY")
 	out = []
 	for search in cfg.get("searches", []):
-		resp = requests.post(f"https://jooble.org/api/{key}", json={"keywords": search["keywords"], "location": search.get("location", "")}, timeout=TIMEOUT)
+		resp = session().post(f"https://jooble.org/api/{key}", json={"keywords": search["keywords"], "location": search.get("location", "")}, timeout=TIMEOUT)
 		resp.raise_for_status()
 		for j in resp.json().get("jobs", []):
 			out.append({
@@ -346,7 +346,8 @@ def jooble(cfg):
 				"description": j.get("snippet"),
 				"posted": iso_from_text(j.get("updated")),
 				"salary": j.get("salary") or "",
-				"source": f"Jooble (API) · {j.get('source') or ''}".strip(" ·"),
+				"source": "Jooble (API)",
+				"query": search["keywords"],
 			})
 		time.sleep(1)
 	return out
@@ -371,6 +372,7 @@ def adzuna(cfg):
 				"salary": salary_text(j.get("salary_min"), j.get("salary_max"), "EUR", "year"),
 				"salaryEur": salary_eur(j.get("salary_min"), j.get("salary_max"), "EUR", "year"),
 				"source": "Adzuna (API)",
+				"query": search["what"],
 			})
 		time.sleep(1)
 	return out

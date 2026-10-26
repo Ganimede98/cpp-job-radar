@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-from classify import RULES_VERSION, classify, dedupe_key, slug  # noqa: E402
+from classify import LAST_REJECT, RULES_VERSION, classify, dedupe_key, slug  # noqa: E402
 from sources import LAST_ERRORS, READERS, SkipSource, session  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -118,6 +118,7 @@ def main():
 		results = list(pool.map(read_source, CONFIG["sources"]))
 
 	new_by_source = {}
+	debug = {}  # esempi di annunci scartati per motivo, per capire se le regole sono troppo severe
 	for src, raw_jobs, error, partial, seconds in results:
 		entry = {"id": src["id"], "name": src["name"], "group": src["group"], "url": src["url"], "kind": "auto", "note": src.get("note", ""), "lastRead": now, "seconds": round(seconds, 1)}
 		if isinstance(error, SkipSource):
@@ -126,9 +127,18 @@ def main():
 			entry.update(lastStatus="errore", lastCount=0, error=f"{type(error).__name__}: {str(error)[:200]}")
 		else:
 			kept = 0
+			rejected, samples = {}, {}
 			for raw in raw_jobs:
+				LAST_REJECT["reason"] = None
 				job = classify(raw, raw.get("default_tech"), CONFIG.get("excludeGaming", False))
-				if not job or too_old(job.get("posted"), CONFIG.get("maxAgeDays", 150)):
+				if job and too_old(job.get("posted"), CONFIG.get("maxAgeDays", 150)):
+					job, LAST_REJECT["reason"] = None, "troppo vecchio"
+				if not job:
+					reason = LAST_REJECT["reason"] or "altro"
+					rejected[reason] = rejected.get(reason, 0) + 1
+					bucket = samples.setdefault(reason, [])
+					if len(bucket) < 5:
+						bucket.append(f"{raw.get('title')} — {raw.get('company')} — {raw.get('location')}")
 					continue
 				job["priority"] = src.get("priority", 1)
 				job["sourceId"] = src["id"]
@@ -147,7 +157,8 @@ def main():
 				if job_id not in previous:
 					new_by_source[src["id"]] = new_by_source.get(src["id"], 0) + 1
 				kept += 1
-			entry.update(lastStatus="parziale" if partial else "ok", lastCount=kept, found=len(raw_jobs))
+			entry.update(lastStatus="parziale" if partial else "ok", lastCount=kept, found=len(raw_jobs), rejected=dict(sorted(rejected.items(), key=lambda kv: -kv[1])))
+			debug[src["id"]] = samples
 			if partial:
 				entry["error"] = "; ".join(partial)[:300]
 			ok_sources.add(src["id"])
@@ -209,6 +220,7 @@ def main():
 
 	save("jobs.json", result)
 	save("sources.json", statuses)
+	save("debug.json", debug)
 	save("meta.json", {"lastUpdate": now, "lastSummary": summary})
 	print(summary)
 

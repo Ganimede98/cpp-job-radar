@@ -10,7 +10,7 @@ import html
 import re
 
 # Versione delle regole: quando cambia, gli annunci automatici classificati con regole vecchie vengono rivalutati.
-RULES_VERSION = 6
+RULES_VERSION = 7
 
 # ---------------------------------------------------------------- testo
 
@@ -117,7 +117,7 @@ def detect_level(title, description=""):
 	"""Restituisce None se il ruolo va escluso (junior, lead, ...).
 
 	Il titolo ha la precedenza; se non dice nulla si usano gli anni richiesti nella descrizione:
-	fino a 2 anni = junior (escluso), 3-5 = mid, 6 o più = senior.
+	fino a 1 anno = junior (escluso), 2-4 = mid, 5 o più = senior.
 	"""
 	if RE_EXCLUDE_LEVEL.search(title or ""):
 		return None
@@ -128,9 +128,9 @@ def detect_level(title, description=""):
 	years = years_required(description)
 	if years is None:
 		return "n.d."
-	if years <= 2:
+	if years <= 1:
 		return None
-	return "mid" if years <= 5 else "senior"
+	return "mid" if years <= 4 else "senior"
 
 
 # ---------------------------------------------------------------- modalità e geografia
@@ -241,6 +241,15 @@ def salary_from_text(text):
 	return f"{low:,}–{high:,} € / anno".replace(",", "."), int(round((low + high) / 2, -2))
 
 
+# Motivo dell'ultimo scarto, letto da run.py per le statistiche della scheda Fonti.
+LAST_REJECT = {"reason": None}
+
+
+def reject(reason):
+	LAST_REJECT["reason"] = reason
+	return None
+
+
 RE_EXCLUDE_TEXT = re.compile(r"categorie protette|l\.?\s?68/99|stage curriculare|tirocinio|neolaureat", re.I)
 
 # ---------------------------------------------------------------- classificazione completa
@@ -257,32 +266,34 @@ def classify(raw, default_tech=None, exclude_gaming=False):
 	description = strip_html(raw.get("description"))[:6000]
 	location = strip_html(raw.get("location"))
 	if not title or not raw.get("url", "").startswith("https://"):
-		return None
+		return reject("dati incompleti")
 
 	text = f"{title} {description}"
 	if not RE_DEV_ROLE.search(title):
-		return None
+		return reject("non è un ruolo di sviluppo")
 	# Ruoli web/backend/mobile/dati: esclusi, a meno che il titolo non citi esplicitamente C++.
 	if RE_OFF_TOPIC_ROLE.search(title) and not RE_CPP.search(title):
-		return None
+		return reject("ruolo web/backend/mobile/dati")
 
 	if RE_EXCLUDE_TEXT.search(title):
-		return None  # categorie protette, stage, neolaureati: non pertinenti
+		return reject("categorie protette / stage / neolaureati")
 	level = detect_level(title, description)
 	if level is None:
-		return None
+		return reject("livello junior o lead")
 
 	tech = detect_tech(text)
 	# Rilevanza: la tecnologia deve stare nel titolo, oppure essere citata almeno due volte nella descrizione.
 	# Evita gli annunci generici che elencano C++ in mezzo a venti linguaggi.
 	title_hit = bool(RE_CPP.search(title) or RE_UNREAL.search(title) or RE_UNITY.search(title))
 	desc_hits = len(RE_CPP.findall(description)) + len(RE_UNREAL.findall(description))
-	if not title_hit and desc_hits < 2 and not default_tech:
-		return None
+	# Le fonti che cercano per parola chiave (Jooble, Adzuna) hanno già filtrato su "C++": basta una citazione.
+	query_hint = "c++" in (raw.get("query") or "").lower()
+	if not title_hit and desc_hits < (1 if query_hint else 2) and not default_tech:
+		return reject("C++/Unreal non abbastanza centrale")
 	if not tech and default_tech:
 		tech = list(default_tech)
 	if not tech:
-		return None
+		return reject("nessuna tecnologia riconosciuta")
 	# Se la fonte sa già se è uno studio di videogiochi, vale quello; altrimenti decide il testo.
 	# (Una descrizione di Canonical che cita "gaming su Ubuntu" non rende gaming il ruolo.)
 	if raw.get("gaming") is not None:
@@ -290,19 +301,21 @@ def classify(raw, default_tech=None, exclude_gaming=False):
 	else:
 		gaming = bool(RE_GAMING.search(text))
 	if exclude_gaming and gaming:
-		return None  # focus attuale: solo C++ fuori dal gaming
+		return reject("gaming escluso dalla configurazione")
 	if exclude_gaming and "C++" not in tech:
-		return None  # fuori dal gaming serve C++ esplicito (Unreal/Unity da soli non bastano)
+		return reject("fuori dal gaming senza C++")
 	# Unity/C# senza C++ né Unreal interessa solo nel gaming.
 	if "C++" not in tech and "Unreal" not in tech and not gaming:
-		return None
+		return reject("Unity/C# fuori dal gaming")
 
 	remote = raw.get("remote")
 	if remote is None:
 		remote = bool(RE_REMOTE.search(f"{location} {title}"))
 	geo, city, geo_note = detect_geo(location, text, remote, raw.get("countries") or [], title)
-	if geo in (None, "no"):
-		return None  # fuori Roma senza remoto, oppure remoto che esclude l'Italia
+	if geo is None:
+		return reject("in sede fuori Roma")
+	if geo == "no":
+		return reject("remoto che esclude l'Italia")
 
 	mode = detect_mode(f"{location} {title} {description[:1500]}")
 	if remote and mode == "n.d.":
