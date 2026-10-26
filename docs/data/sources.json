@@ -7,9 +7,11 @@
   "kind": "auto",
   "note": "Thread mensile letto via API Algolia.",
   "lastRead": "2026-10-26",
+  "seconds": 1.1,
   "lastStatus": "ok",
   "lastCount": 1,
-  "found": 26
+  "found": 25,
+  "newCount": 1
  },
  {
   "id": "meetingcpp",
@@ -19,9 +21,11 @@
   "kind": "auto",
   "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa.",
   "lastRead": "2026-10-26",
+  "seconds": 0.7,
   "lastStatus": "ok",
   "lastCount": 0,
-  "found": 0
+  "found": 0,
+  "newCount": 0
  },
  {
   "id": "himalayas",
@@ -31,9 +35,11 @@
   "kind": "auto",
   "note": "API ufficiale: solo remoti che ammettono l'Italia. Ricerche gaming (Unreal, engine, gameplay, grafica) e non-gaming (embedded, Qt, simulazione, robotica, visione, bassa latenza).",
   "lastRead": "2026-10-26",
+  "seconds": 10.1,
   "lastStatus": "ok",
-  "lastCount": 7,
-  "found": 224
+  "lastCount": 6,
+  "found": 224,
+  "newCount": 6
  },
  {
   "id": "reddit",
@@ -43,9 +49,11 @@
   "kind": "auto",
   "note": "Thread trimestrale. Serve un'app Reddit gratuita (vedi README).",
   "lastRead": "2026-10-26",
+  "seconds": 0.0,
   "lastStatus": "non configurata",
   "lastCount": 0,
-  "error": "mancano i secret REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET"
+  "error": "mancano i secret REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET",
+  "newCount": 0
  },
  {
   "id": "jooble",
@@ -55,9 +63,11 @@
   "kind": "auto",
   "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane.",
   "lastRead": "2026-10-26",
+  "seconds": 0.0,
   "lastStatus": "non configurata",
   "lastCount": 0,
-  "error": "manca il secret JOOBLE_API_KEY"
+  "error": "manca il secret JOOBLE_API_KEY",
+  "newCount": 0
  },
  {
   "id": "adzuna",
@@ -67,9 +77,11 @@
   "kind": "auto",
   "note": "API gratuita con chiave (vedi README).",
   "lastRead": "2026-10-26",
+  "seconds": 0.0,
   "lastStatus": "non configurata",
   "lastCount": 0,
-  "error": "mancano i secret ADZUNA_APP_ID / ADZUNA_APP_KEY"
+  "error": "mancano i secret ADZUNA_APP_ID / ADZUNA_APP_KEY",
+  "newCount": 0
  },
  {
   "id": "workable",
@@ -79,9 +91,11 @@
   "kind": "auto",
   "note": "Studi di videogiochi che assumono anche in remoto UE. Slug verificati il 26/10/2026.",
   "lastRead": "2026-10-26",
+  "seconds": 1.2,
   "lastStatus": "ok",
   "lastCount": 2,
-  "found": 33
+  "found": 33,
+  "newCount": 1
  },
  {
   "id": "greenhouse",
@@ -91,9 +105,11 @@
   "kind": "auto",
   "note": "Aziende C++ che assumono in remoto: Canonical (Ubuntu), Mozilla (Firefox), Brave (Chromium), MariaDB, Databento. Slug verificati il 26/10/2026.",
   "lastRead": "2026-10-26",
+  "seconds": 0.3,
   "lastStatus": "ok",
-  "lastCount": 20,
-  "found": 492
+  "lastCount": 19,
+  "found": 492,
+  "newCount": 19
  },
  {
   "id": "ashby",
@@ -103,9 +119,11 @@
   "kind": "auto",
   "note": "Database in C++, molti ruoli remoti. Slug verificato il 26/10/2026.",
   "lastRead": "2026-10-26",
+  "seconds": 0.1,
   "lastStatus": "ok",
   "lastCount": 0,
-  "found": 203
+  "found": 203,
+  "newCount": 0
  },
  {
   "id": "lever",
@@ -115,9 +133,11 @@
   "kind": "auto",
   "note": "Xsolla: ruoli Unreal e remoti in Europa. Slug verificato il 26/10/2026.",
   "lastRead": "2026-10-26",
+  "seconds": 0.3,
   "lastStatus": "ok",
   "lastCount": 0,
-  "found": 186
+  "found": 186,
+  "newCount": 0
  },
  {
   "id": "linkedin-c-roma",
