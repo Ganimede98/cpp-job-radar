@@ -7,11 +7,11 @@
   "kind": "auto",
   "note": "Thread mensile letto via API Algolia.",
   "lastRead": "2026-10-26",
-  "seconds": 1.1,
+  "seconds": 1.0,
   "lastStatus": "ok",
   "lastCount": 1,
-  "found": 25,
-  "newCount": 1
+  "found": 23,
+  "newCount": 0
  },
  {
   "id": "meetingcpp",
@@ -21,7 +21,7 @@
   "kind": "auto",
   "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa.",
   "lastRead": "2026-10-26",
-  "seconds": 0.7,
+  "seconds": 0.4,
   "lastStatus": "ok",
   "lastCount": 0,
   "found": 0,
@@ -35,11 +35,11 @@
   "kind": "auto",
   "note": "API ufficiale: solo remoti che ammettono l'Italia. Ricerche gaming (Unreal, engine, gameplay, grafica) e non-gaming (embedded, Qt, simulazione, robotica, visione, bassa latenza).",
   "lastRead": "2026-10-26",
-  "seconds": 10.1,
+  "seconds": 9.1,
   "lastStatus": "ok",
   "lastCount": 6,
   "found": 224,
-  "newCount": 6
+  "newCount": 0
  },
  {
   "id": "reddit",
@@ -63,10 +63,10 @@
   "kind": "auto",
   "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane.",
   "lastRead": "2026-10-26",
-  "seconds": 0.0,
-  "lastStatus": "non configurata",
+  "seconds": 10.2,
+  "lastStatus": "ok",
   "lastCount": 0,
-  "error": "manca il secret JOOBLE_API_KEY",
+  "found": 55,
   "newCount": 0
  },
  {
@@ -91,11 +91,11 @@
   "kind": "auto",
   "note": "Studi di videogiochi che assumono anche in remoto UE. Slug verificati il 26/10/2026.",
   "lastRead": "2026-10-26",
-  "seconds": 1.2,
+  "seconds": 0.7,
   "lastStatus": "ok",
   "lastCount": 2,
   "found": 33,
-  "newCount": 1
+  "newCount": 0
  },
  {
   "id": "greenhouse",
@@ -105,11 +105,11 @@
   "kind": "auto",
   "note": "Aziende C++ che assumono in remoto: Canonical (Ubuntu), Mozilla (Firefox), Brave (Chromium), MariaDB, Databento. Slug verificati il 26/10/2026.",
   "lastRead": "2026-10-26",
-  "seconds": 0.3,
+  "seconds": 0.2,
   "lastStatus": "ok",
   "lastCount": 19,
   "found": 492,
-  "newCount": 19
+  "newCount": 0
  },
  {
   "id": "ashby",
@@ -133,7 +133,7 @@
   "kind": "auto",
   "note": "Xsolla: ruoli Unreal e remoti in Europa. Slug verificato il 26/10/2026.",
   "lastRead": "2026-10-26",
-  "seconds": 0.3,
+  "seconds": 1.2,
   "lastStatus": "ok",
   "lastCount": 0,
   "found": 186,
