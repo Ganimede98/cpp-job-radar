@@ -8,20 +8,37 @@ run.py la registra come "errore" e continua con le altre.
 import datetime as dt
 import os
 import re
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-from classify import salary_eur, salary_text, strip_html
+from classify import RE_DEV_ROLE, salary_eur, salary_text, strip_html
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 cpp-job-radar"
 TIMEOUT = 25
 
+# Una sola sessione HTTP per tutto il giro: riusa le connessioni e ritenta da sola
+# gli errori temporanei (429 e 5xx) con attese crescenti, rispettando Retry-After.
+_local = threading.local()
+
+
+def session():
+	if not hasattr(_local, "s"):
+		s = requests.Session()
+		retry = Retry(total=3, backoff_factor=1.5, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=("GET", "POST", "HEAD"), respect_retry_after_header=True)
+		adapter = HTTPAdapter(max_retries=retry, pool_maxsize=16)
+		s.mount("https://", adapter)
+		s.headers["User-Agent"] = UA
+		_local.s = s
+	return _local.s
+
 
 def get(url, **kw):
-	headers = kw.pop("headers", {})
-	headers.setdefault("User-Agent", UA)
-	resp = requests.get(url, headers=headers, timeout=TIMEOUT, **kw)
+	resp = session().get(url, timeout=TIMEOUT, **kw)
 	resp.raise_for_status()
 	return resp
 
@@ -177,6 +194,9 @@ def workable(cfg):
 		for title, g in groups.items():
 			j = g["job"]
 			countries = sorted(g["countries"])
+			detail = workable_detail(company["slug"], j.get("shortcode")) if RE_DEV_ROLE.search(title or "") else {}
+			if detail.get("workplace") in ("remote", "hybrid"):
+				g["remote"] = g["remote"] or detail["workplace"] == "remote"
 			out.append({
 				"company": company.get("name") or data.get("name"),
 				"title": title,
@@ -184,7 +204,7 @@ def workable(cfg):
 				"location": ("Remoto · " if g["remote"] else "") + ", ".join(sorted(g["cities"]) + countries),
 				"remote": g["remote"],
 				"countries": countries if g["remote"] else [],
-				"description": f"{j.get('department') or ''} {j.get('function') or ''}",
+				"description": detail.get("text") or f"{j.get('department') or ''} {j.get('function') or ''}",
 				"posted": iso_from_text(j.get("published_on")),
 				"gaming": company.get("gaming", True),
 				"default_tech": company.get("tech"),
@@ -193,6 +213,18 @@ def workable(cfg):
 		return out
 
 	return each_company(cfg, fetch)
+
+
+def workable_detail(slug, shortcode):
+	"""Descrizione e requisiti completi di un annuncio Workable (la lista non li include)."""
+	if not shortcode:
+		return {}
+	try:
+		d = get(f"https://apply.workable.com/api/v2/accounts/{slug}/jobs/{shortcode}").json()
+	except Exception:  # noqa: BLE001 - senza dettaglio si classifica col solo titolo
+		return {}
+	text = " ".join(filter(None, (d.get("description"), d.get("requirements"), d.get("workplace"))))
+	return {"text": text, "workplace": d.get("workplace")}
 
 
 def greenhouse(cfg):
@@ -391,13 +423,21 @@ LAST_ERRORS = {}  # tipo fonte -> errori dei singoli studi nell'ultimo giro
 
 
 def each_company(cfg, fetch):
-	"""Esegue fetch(company) per ogni studio; uno slug sbagliato non blocca gli altri."""
-	out, errors = [], []
-	for company in cfg.get("companies", []):
+	"""Esegue fetch(company) per ogni studio, in parallelo; uno slug sbagliato non blocca gli altri."""
+	companies = cfg.get("companies", [])
+
+	def safe(company):
 		try:
-			out.extend(fetch(company))
+			return fetch(company), None
 		except Exception as exc:  # noqa: BLE001
-			errors.append(f"{company.get('name')}: {type(exc).__name__} {str(exc)[:80]}")
+			return [], f"{company.get('name')}: {type(exc).__name__} {str(exc)[:80]}"
+
+	out, errors = [], []
+	with ThreadPoolExecutor(max_workers=6) as pool:
+		for jobs, err in pool.map(safe, companies):
+			out.extend(jobs)
+			if err:
+				errors.append(err)
 	LAST_ERRORS[cfg["type"]] = errors
 	if errors and not out and len(errors) == len(cfg.get("companies", [])):
 		raise RuntimeError("; ".join(errors))

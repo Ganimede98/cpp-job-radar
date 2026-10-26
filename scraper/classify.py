@@ -10,7 +10,7 @@ import html
 import re
 
 # Versione delle regole: quando cambia, gli annunci automatici classificati con regole vecchie vengono rivalutati.
-RULES_VERSION = 5
+RULES_VERSION = 6
 
 # ---------------------------------------------------------------- testo
 
@@ -103,15 +103,34 @@ RE_SENIOR = re.compile(r"\b(senior|sr\.?|expert|iii)\b", re.I)
 RE_MID = re.compile(r"\b(mid|middle|mid-level|intermediate|regular|ii)\b", re.I)
 
 
-def detect_level(title):
-	"""Restituisce None se il ruolo va escluso (junior, lead, ...)."""
+RE_YEARS = re.compile(r"(\d{1,2})\s*\+?\s*(?:-\s*\d{1,2}\s*)?(?:years?|yrs|anni)", re.I)
+
+
+def years_required(description):
+	"""Anni di esperienza richiesti secondo la descrizione (il valore più alto plausibile), o None."""
+	values = [int(m.group(1)) for m in RE_YEARS.finditer(description or "")]
+	values = [v for v in values if 1 <= v <= 15]
+	return max(values) if values else None
+
+
+def detect_level(title, description=""):
+	"""Restituisce None se il ruolo va escluso (junior, lead, ...).
+
+	Il titolo ha la precedenza; se non dice nulla si usano gli anni richiesti nella descrizione:
+	fino a 2 anni = junior (escluso), 3-5 = mid, 6 o più = senior.
+	"""
 	if RE_EXCLUDE_LEVEL.search(title or ""):
 		return None
 	if RE_SENIOR.search(title or ""):
 		return "senior"
 	if RE_MID.search(title or ""):
 		return "mid"
-	return "n.d."
+	years = years_required(description)
+	if years is None:
+		return "n.d."
+	if years <= 2:
+		return None
+	return "mid" if years <= 5 else "senior"
 
 
 # ---------------------------------------------------------------- modalità e geografia
@@ -203,6 +222,27 @@ def salary_text(min_v, max_v, currency, period):
 	return f"{rng} {cur}{' / ' + per if per else ''}".strip()
 
 
+RE_SALARY_RANGE = re.compile(r"(?:ral|€|eur|euro|salary|stipendio|retribuzione)[^0-9]{0,25}(\d{2,3})[.,]?(\d{3})?\s*(k)?\s*(?:€|eur)?\s*[-–a]\s*(?:€\s*)?(\d{2,3})[.,]?(\d{3})?\s*(k)?", re.I)
+
+
+def salary_from_text(text):
+	"""Cerca una fascia di stipendio annuo in euro nella descrizione (es. "RAL 35.000 - 45.000", "€40k-50k")."""
+	m = RE_SALARY_RANGE.search(text or "")
+	if not m:
+		return "", None
+
+	def value(head, tail, k):
+		v = int(head) * 1000 if (tail or k) else int(head)
+		return v
+
+	low, high = value(m.group(1), m.group(2), m.group(3)), value(m.group(4), m.group(5), m.group(6))
+	if not (15000 <= low <= high <= 250000):
+		return "", None
+	return f"{low:,}–{high:,} € / anno".replace(",", "."), int(round((low + high) / 2, -2))
+
+
+RE_EXCLUDE_TEXT = re.compile(r"categorie protette|l\.?\s?68/99|stage curriculare|tirocinio|neolaureat", re.I)
+
 # ---------------------------------------------------------------- classificazione completa
 
 
@@ -226,7 +266,9 @@ def classify(raw, default_tech=None, exclude_gaming=False):
 	if RE_OFF_TOPIC_ROLE.search(title) and not RE_CPP.search(title):
 		return None
 
-	level = detect_level(title)
+	if RE_EXCLUDE_TEXT.search(title):
+		return None  # categorie protette, stage, neolaureati: non pertinenti
+	level = detect_level(title, description)
 	if level is None:
 		return None
 
@@ -241,7 +283,12 @@ def classify(raw, default_tech=None, exclude_gaming=False):
 		tech = list(default_tech)
 	if not tech:
 		return None
-	gaming = bool(RE_GAMING.search(text)) or raw.get("gaming") is True
+	# Se la fonte sa già se è uno studio di videogiochi, vale quello; altrimenti decide il testo.
+	# (Una descrizione di Canonical che cita "gaming su Ubuntu" non rende gaming il ruolo.)
+	if raw.get("gaming") is not None:
+		gaming = bool(raw["gaming"]) or bool(RE_GAMING.search(title))
+	else:
+		gaming = bool(RE_GAMING.search(text))
 	if exclude_gaming and gaming:
 		return None  # focus attuale: solo C++ fuori dal gaming
 	if exclude_gaming and "C++" not in tech:
@@ -261,6 +308,11 @@ def classify(raw, default_tech=None, exclude_gaming=False):
 	if remote and mode == "n.d.":
 		mode = "remoto"
 
+	salary, salary_value = raw.get("salary", ""), raw.get("salaryEur")
+	if not salary:
+		salary, found_value = salary_from_text(description)
+		salary_value = salary_value or found_value
+
 	summary = description[:280].rsplit(" ", 1)[0] + "…" if len(description) > 280 else description
 	return {
 		"company": company,
@@ -276,8 +328,8 @@ def classify(raw, default_tech=None, exclude_gaming=False):
 		"city": city,
 		"geo": geo,
 		"geoNote": geo_note,
-		"salary": raw.get("salary", ""),
-		"salaryEur": raw.get("salaryEur"),
+		"salary": salary,
+		"salaryEur": salary_value,
 		"posted": raw.get("posted"),
 		"status": "aperto",
 		"summary": summary,

@@ -399,7 +399,7 @@ footer p{margin:0;max-width:75ch}
           <span>Sede: <b>${esc(j.location||"n.d.")}</b></span>
           <span>Stipendio: <b>${esc(j.salary||"non indicato")}</b></span>
           <span>Pubblicato: <b class="mono">${fmtDate(j.posted)}</b></span>
-          <span>${j.origin==="seed"?"Verificato a mano":"Controllato"}: <span class="mono">${fmtDate(j.checkedAt)}</span></span>
+          ${j.origin==="seed" ? `<span>Verificato a mano: <span class="mono">${fmtDate(j.addedAt)}</span>${j.linkCheckedAt?` · link ok il <span class="mono">${fmtDate(j.linkCheckedAt)}</span>`:""}</span>` : `<span>Controllato: <span class="mono">${fmtDate(j.checkedAt)}</span></span>`}
         </div>
         <details>
           <summary>Dettagli</summary>
@@ -461,7 +461,7 @@ footer p{margin:0;max-width:75ch}
       const items = groups[g].sort((a,b)=> (a.kind===b.kind?0:(a.kind==="auto"?-1:1)) || (a.name||"").localeCompare(b.name||""));
       sec.innerHTML = `<h3>${esc(g)} <span class="note">· ${items.length}</span></h3><ul class="src-list">${items.map(s=>{
         const url = safeUrl(s.url);
-        const st = s.kind==="auto" && s.lastStatus ? `<span class="pill st-${esc(s.lastStatus.replace(/\s+/g,"-"))}">${esc(SRC_STATUS[s.lastStatus]||s.lastStatus)}${s.lastCount!=null?` · ${Number(s.lastCount)||0}`:""}</span>` : "";
+        const st = s.kind==="auto" && s.lastStatus ? `<span class="pill st-${esc(s.lastStatus.replace(/\s+/g,"-"))}">${esc(SRC_STATUS[s.lastStatus]||s.lastStatus)}${s.lastCount!=null?` · ${Number(s.lastCount)||0} pertinenti`:""}${s.found?` su ${Number(s.found)}`:""}${s.newCount?` · ${Number(s.newCount)} nuovi`:""}</span>` : "";
         return `<li class="src"><span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`:esc(s.name)}</span>
           <span class="right"><span class="pill">${s.kind==="auto"?"Automatica":"Manuale"}</span>${st}</span>
           <span class="sub">${esc(s.note||"")}${s.lastRead?` · letta il ${fmtDate(s.lastRead)}`:""}${s.error?` · ${esc(s.error)}`:""}</span></li>`;

@@ -134,3 +134,27 @@ def test_non_gaming_focus_keeps_remote_systems_role():
 def test_simulation_and_robotics_tags():
 	j = job("C++ Software Engineer for Robotics - Padova, Italy", "Xaba", location="Padova, Italy", description="C++ motion planning, ROS2, simulation", exclude_gaming=True)
 	assert j and "robotics" in j["spec"] and "simulation" in j["spec"]
+
+
+# ---------------------------------------------------------------- arricchimento dalla descrizione
+
+def test_company_flag_beats_gaming_words_in_description():
+	j = job("Software Engineer - Cross-platform C++ - Multipass", "Canonical", location="Home Based - EMEA", description="C++ on Linux. Ubuntu is great for gaming and games.", gaming=False)
+	assert j and j["area"] == "non-gaming"
+
+
+def test_protected_categories_excluded():
+	assert job("SW Developer C++ categorie protette L.68/99 - Full Remote", "Develer", remote=True, countries=["Italy"]) is None
+
+
+def test_level_from_years_in_description():
+	assert job("C++ Developer", location="Roma", description="Almeno 7 anni di esperienza in C++")["level"] == "senior"
+	assert job("C++ Developer", location="Roma", description="3+ years of C++ experience")["level"] == "mid"
+	assert job("C++ Developer", location="Roma", description="1-2 anni di esperienza in C++") is None
+
+
+def test_salary_from_description():
+	j = job("Sviluppatore C++", location="Roma", description="C++ su Linux. RAL 35.000 - 45.000 in base all'esperienza")
+	assert j["salaryEur"] == 40000 and j["salary"].startswith("35.000")
+	j = job("Senior C++ Engineer", location="Roma", description="C++ realtime, salary €50k-60k")
+	assert j["salaryEur"] == 55000

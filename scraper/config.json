@@ -353,5 +353,7 @@
       "note": "Meetup e contatti."
     }
   ],
-  "excludeGaming": false
+  "excludeGaming": false,
+  "linkCheckEveryDays": 7,
+  "linkCheckMaxPerRun": 80
 }

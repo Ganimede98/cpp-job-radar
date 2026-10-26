@@ -58,6 +58,15 @@ Jooble e Adzuna sono le più utili per **Roma**: le cercano già con "C++", "C++
 In `scraper/config.json`, nella fonte `workable`, `greenhouse` o `lever`, aggiungi una riga con nome e *slug* (la parte finale dell'indirizzo della pagina carriere, es. `apply.workable.com/rebellion` → `rebellion`).
 Se dopo un aggiornamento la scheda **Fonti** mostra "Errore" per uno studio, lo slug è sbagliato.
 
+## Come lavora lo scraper
+
+1. **Legge tutte le fonti in parallelo**, con una sessione HTTP che ritenta da sola gli errori temporanei (429, 5xx) rispettando i tempi di attesa chiesti dal server. Uno slug sbagliato o una fonte giù non bloccano le altre.
+2. **Arricchisce gli annunci**: per Workable scarica descrizione e requisiti completi; da ogni descrizione ricava anni di esperienza (→ livello), fascia di stipendio, modalità (ibrido/remoto) e tecnologie (C++ moderno, Qt, Linux…).
+3. **Classifica e scarta** con regole testate (`tests/`): junior/lead/stage, categorie protette, ruoli web/mobile/dati, remoti che escludono l'Italia, in sede fuori Roma.
+4. **Unisce i duplicati** arrivati da fonti diverse, tenendo il link più diretto.
+5. **Ricontrolla i link**: ogni 7 giorni riapre la pagina degli annunci non più confermati da una fonte (compresi quelli verificati a mano) e li segna *chiusi* se rispondono 404 o dicono che la posizione non è più disponibile. Al massimo 80 controlli per giro (`linkCheckEveryDays`, `linkCheckMaxPerRun` in `config.json`).
+6. **Scrive le statistiche** di ogni fonte (letti, pertinenti, nuovi, secondi impiegati) nella scheda Fonti.
+
 ## Come vengono classificati gli annunci
 
 Lo scraper non usa intelligenza artificiale: applica regole su parole chiave (`scraper/classify.py`).
