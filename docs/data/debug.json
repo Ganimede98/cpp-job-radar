@@ -26,6 +26,13 @@
  },
  "meetingcpp": {},
  "himalayas": {
+  "ruolo web/backend/mobile/dati": [
+   "Backend Developer (.NET - C#) — DataKrew Pvt. Ltd. — Remoto: ovunque",
+   "Backend Security Engineer, Remote - Contract — Xperteez Technology — Remoto: ovunque",
+   "Software Engineer – Backend | Remote - Contract — Xperteez Technology — Remoto: ovunque",
+   "Senior Backend Engineer — Xperteez Technology — Remoto: ovunque",
+   "Software Engineer – Backend — EVB — Remoto: ovunque"
+  ],
   "non è un ruolo di sviluppo": [
    "Puzzle Solver (Coding) | Remote - Contract — Xperteez Technology — Remoto: ovunque",
    "Lead Vulnerability Intelligence Analyst (Europe or LATAM, Remote) — Intel 471 — Remoto: ovunque",
@@ -34,11 +41,11 @@
    "Hardware Expert (MSc. or PhD) — micro1 — Remoto: ovunque"
   ],
   "C++/Unreal non abbastanza centrale": [
-   ".NET Developer — Uno Platform — Remoto: ovunque",
    "High-Accuracy GNSS Algorithms Engineer — Swift Navigation — Remoto: Albania, Andorra, Austria, Belarus, Belgium…",
    "Software Engineer — micro1 — Remoto: ovunque",
    "Connectivity Engineer (Crypto) — Taraki — Remoto: ovunque",
-   "Senior Software Engineer, Accessibility — Mozilla — Remoto: ovunque"
+   "Low-Latency Trading Systems Developer — Nitka — Remoto: ovunque",
+   "Senior Software Engineer (Monitor Ingestion team) — Sysdig — Remoto: Italy"
   ],
   "remoto che esclude l'Italia": [
    "Senior Graphics Engineer (Unreal) — VOID Interactive — Remoto: ovunque",
@@ -46,13 +53,6 @@
    "Robotics Engineer, Autonomous Systems — Clera — Remoto: ovunque",
    "Mid-Level Robotics Engineer, Autonomous Systems — Clera — Remoto: ovunque",
    "🌎 Software Engineer (Open Source Contributor), Remote- Contract — Xperteez Technology — Remoto: ovunque"
-  ],
-  "ruolo web/backend/mobile/dati": [
-   "Backend Developer .Net - Remote from EU - Deadline 27/10/26 — AlmavivA de Belgique — Remoto: ovunque",
-   "Backend Security Engineer, Remote - Contract — Xperteez Technology — Remoto: ovunque",
-   "Software Engineer – Backend | Remote - Contract — Xperteez Technology — Remoto: ovunque",
-   "Senior Backend Engineer — Xperteez Technology — Remoto: ovunque",
-   "Software Engineer – Backend — EVB — Remoto: ovunque"
   ],
   "livello junior o lead": [
    "Staff Storage Platform Engineer (AI Storage) - Remote — Radian Arc — Remoto: ovunque",
@@ -67,11 +67,11 @@
  },
  "jooble": {
   "non è un ruolo di sviluppo": [
-   "In-Office Tax Team Leader Coaching & Client Experience — H&R Block — Rio Grande City, TX",
    "Lead / Supervisory Transportation Security Officer - Entry Level in Lopeno, TX — TSA Job Listings — Lopeno, TX",
-   "Team Leader — H&R Block — Rio Grande City, TX",
-   "Restaurant Assistant Manager: Lead, Train & Wow Guests — Dhanani Group Inc — Escobares, TX",
-   "Frontline Border Patrol Team Lead — US Customs and Border Protection — Rio Grande City, TX"
+   "Team Lead — BlueWave Express Car Wash — Rio Grande City, TX",
+   "Assistant Site Leader — Clearwater Express Wash — Rio Grande City, TX",
+   "Assistant Site Leader — BlueWave | ClearWater: Careers — Rio Grande City, TX",
+   "Lead / Supervisory Transportation Security Officer - Entry Level in Lopeno, TX — TSA Job Listings — Lopeno, TX"
   ],
   "ruolo web/backend/mobile/dati": [
    "Inside Sales Engineer — The Kinsley Group — Rio Grande, TX",

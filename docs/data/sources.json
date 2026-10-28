@@ -6,8 +6,8 @@
   "url": "https://news.ycombinator.com/submitted?id=whoishiring",
   "kind": "auto",
   "note": "Thread mensile letto via API Algolia.",
-  "lastRead": "2026-10-26",
-  "seconds": 1.2,
+  "lastRead": "2026-10-28",
+  "seconds": 1.4,
   "lastStatus": "ok",
   "lastCount": 1,
   "found": 26,
@@ -17,7 +17,7 @@
    "livello junior o lead": 3,
    "in sede fuori Roma": 3
   },
-  "newCount": 1
+  "newCount": 0
  },
  {
   "id": "meetingcpp",
@@ -26,7 +26,7 @@
   "url": "https://meetingcpp.com/jobs/",
   "kind": "auto",
   "note": "Bacheca della conferenza Meeting C++, centrata sull'Europa.",
-  "lastRead": "2026-10-26",
+  "lastRead": "2026-10-28",
   "seconds": 0.6,
   "lastStatus": "ok",
   "lastCount": 0,
@@ -41,20 +41,20 @@
   "url": "https://himalayas.app/jobs",
   "kind": "auto",
   "note": "API ufficiale: solo remoti che ammettono l'Italia. Ricerche gaming (Unreal, engine, gameplay, grafica) e non-gaming (embedded, Qt, simulazione, robotica, visione, bassa latenza).",
-  "lastRead": "2026-10-26",
-  "seconds": 11.1,
+  "lastRead": "2026-10-28",
+  "seconds": 16.9,
   "lastStatus": "ok",
   "lastCount": 6,
-  "found": 224,
+  "found": 222,
   "rejected": {
-   "non è un ruolo di sviluppo": 85,
-   "C++/Unreal non abbastanza centrale": 59,
-   "remoto che esclude l'Italia": 45,
-   "ruolo web/backend/mobile/dati": 16,
+   "non è un ruolo di sviluppo": 83,
+   "C++/Unreal non abbastanza centrale": 56,
+   "remoto che esclude l'Italia": 47,
+   "ruolo web/backend/mobile/dati": 17,
    "livello junior o lead": 12,
    "categorie protette / stage / neolaureati": 1
   },
-  "newCount": 6
+  "newCount": 0
  },
  {
   "id": "reddit",
@@ -63,7 +63,7 @@
   "url": "https://www.reddit.com/r/cpp/",
   "kind": "auto",
   "note": "Thread trimestrale. Serve un'app Reddit gratuita (vedi README).",
-  "lastRead": "2026-10-26",
+  "lastRead": "2026-10-28",
   "seconds": 0.0,
   "lastStatus": "non configurata",
   "lastCount": 0,
@@ -77,13 +77,13 @@
   "url": "https://it.jooble.org/",
   "kind": "auto",
   "note": "API gratuita con chiave via email (vedi README). Copre Indeed, LinkedIn e altre bacheche italiane.",
-  "lastRead": "2026-10-26",
-  "seconds": 8.9,
+  "lastRead": "2026-10-28",
+  "seconds": 9.0,
   "lastStatus": "ok",
   "lastCount": 0,
-  "found": 55,
+  "found": 25,
   "rejected": {
-   "non è un ruolo di sviluppo": 50,
+   "non è un ruolo di sviluppo": 20,
    "ruolo web/backend/mobile/dati": 5
   },
   "newCount": 0
@@ -95,7 +95,7 @@
   "url": "https://www.adzuna.it/",
   "kind": "auto",
   "note": "API gratuita con chiave (vedi README).",
-  "lastRead": "2026-10-26",
+  "lastRead": "2026-10-28",
   "seconds": 0.0,
   "lastStatus": "non configurata",
   "lastCount": 0,
@@ -109,8 +109,8 @@
   "url": "https://apply.workable.com/",
   "kind": "auto",
   "note": "Studi di videogiochi che assumono anche in remoto UE. Slug verificati il 26/10/2026.",
-  "lastRead": "2026-10-26",
-  "seconds": 1.1,
+  "lastRead": "2026-10-28",
+  "seconds": 0.9,
   "lastStatus": "ok",
   "lastCount": 2,
   "found": 33,
@@ -121,7 +121,7 @@
    "remoto che esclude l'Italia": 3,
    "livello junior o lead": 1
   },
-  "newCount": 1
+  "newCount": 0
  },
  {
   "id": "greenhouse",
@@ -130,18 +130,18 @@
   "url": "https://boards.greenhouse.io/",
   "kind": "auto",
   "note": "Aziende C++ che assumono in remoto: Canonical (Ubuntu), Mozilla (Firefox), Brave (Chromium), MariaDB, Databento. Slug verificati il 26/10/2026.",
-  "lastRead": "2026-10-26",
-  "seconds": 0.2,
+  "lastRead": "2026-10-28",
+  "seconds": 0.3,
   "lastStatus": "ok",
-  "lastCount": 20,
-  "found": 492,
+  "lastCount": 18,
+  "found": 490,
   "rejected": {
-   "non è un ruolo di sviluppo": 208,
-   "C++/Unreal non abbastanza centrale": 121,
-   "livello junior o lead": 73,
-   "ruolo web/backend/mobile/dati": 70
+   "non è un ruolo di sviluppo": 211,
+   "C++/Unreal non abbastanza centrale": 116,
+   "livello junior o lead": 74,
+   "ruolo web/backend/mobile/dati": 71
   },
-  "newCount": 20
+  "newCount": 0
  },
  {
   "id": "ashby",
@@ -150,15 +150,15 @@
   "url": "https://jobs.ashbyhq.com/",
   "kind": "auto",
   "note": "Database in C++, molti ruoli remoti. Slug verificato il 26/10/2026.",
-  "lastRead": "2026-10-26",
-  "seconds": 0.4,
+  "lastRead": "2026-10-28",
+  "seconds": 0.2,
   "lastStatus": "ok",
   "lastCount": 0,
-  "found": 203,
+  "found": 207,
   "rejected": {
    "non è un ruolo di sviluppo": 81,
-   "C++/Unreal non abbastanza centrale": 76,
-   "ruolo web/backend/mobile/dati": 37,
+   "C++/Unreal non abbastanza centrale": 77,
+   "ruolo web/backend/mobile/dati": 40,
    "livello junior o lead": 6,
    "troppo vecchio": 2,
    "remoto che esclude l'Italia": 1
@@ -172,14 +172,14 @@
   "url": "https://jobs.lever.co/",
   "kind": "auto",
   "note": "Xsolla: ruoli Unreal e remoti in Europa. Slug verificato il 26/10/2026.",
-  "lastRead": "2026-10-26",
-  "seconds": 2.0,
+  "lastRead": "2026-10-28",
+  "seconds": 0.9,
   "lastStatus": "ok",
   "lastCount": 0,
-  "found": 186,
+  "found": 190,
   "rejected": {
-   "non è un ruolo di sviluppo": 96,
-   "ruolo web/backend/mobile/dati": 43,
+   "non è un ruolo di sviluppo": 97,
+   "ruolo web/backend/mobile/dati": 46,
    "C++/Unreal non abbastanza centrale": 29,
    "livello junior o lead": 18
   },
